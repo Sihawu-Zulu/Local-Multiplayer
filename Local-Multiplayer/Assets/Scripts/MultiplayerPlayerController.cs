@@ -22,11 +22,16 @@ public class MultiplayerPlayerController : MonoBehaviour
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
 
-   
+    // --- character visuals ---
     [Header("Character Setup")]
-    [SerializeField] private Transform characterVisualSlot; 
-    [SerializeField] private GameObject p1CharacterPrefab;  
-    [SerializeField] private GameObject p2CharacterPrefab;  
+    [SerializeField] private Transform characterVisualSlot;
+    [SerializeField] private GameObject p1CharacterPrefab;
+    [SerializeField] private GameObject p2CharacterPrefab;
+
+    // --- spawn points ---
+    [Header("Spawn Points")]
+    [SerializeField] private Transform p1SpawnPoint;
+    [SerializeField] private Transform p2SpawnPoint;
 
 
     private CharacterController cc;
@@ -40,9 +45,14 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     public int PlayerID { get; private set; }
 
+    // --- single frame press flags (reset every Update) ---
     public bool LightAttackPressed { get; private set; }
     public bool HeavyAttackPressed { get; private set; }
     public bool ReactionPressed    { get; private set; }
+
+    // --- held flag (stays true while button is held) ---
+    // CombatController will read this every frame to know if blocking is active... will add later
+    public bool BlockHeld          { get; private set; }
 
     // -------------------------------------------------------
 
@@ -57,7 +67,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     private void Start()
     {
-        // spawn   character model once PlayerID is set
+        MoveToSpawnPoint();
         SpawnCharacterVisual();
     }
 
@@ -68,10 +78,30 @@ public class MultiplayerPlayerController : MonoBehaviour
         HandleMovement();
         HandleJump();
 
-    
+        // reset single-frame flags — BlockHeld is NOT reset here.....it stays until released
         LightAttackPressed = false;
         HeavyAttackPressed = false;
         ReactionPressed    = false;
+    }
+
+
+    private void MoveToSpawnPoint()
+    {
+        Transform spawnPoint = PlayerID == 1 ? p1SpawnPoint : p2SpawnPoint;
+
+        if (spawnPoint == null)
+        {
+            Debug.LogWarning($"[Player {PlayerID}] no spawn point assigned — staying at default position");
+            return;
+        }
+
+     
+        cc.enabled = false;
+        transform.position = spawnPoint.position;
+        transform.rotation = spawnPoint.rotation;
+        cc.enabled = true;
+
+        Debug.Log($"[Player {PlayerID}] moved to spawn point: {spawnPoint.position}");
     }
 
     // -------------------------------------------------------
@@ -80,25 +110,22 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     private void SpawnCharacterVisual()
     {
-        // pick the right prefab based on who this player is
         GameObject prefabToSpawn = PlayerID == 1 ? p1CharacterPrefab : p2CharacterPrefab;
 
         if (prefabToSpawn == null)
         {
-        
+            
             return;
         }
 
         if (characterVisualSlot == null)
         {
-
+        
             return;
         }
 
-      
         Instantiate(prefabToSpawn, characterVisualSlot.position, characterVisualSlot.rotation, characterVisualSlot);
-
-  
+        Debug.Log($"[Player {PlayerID}] spawned character: {prefabToSpawn.name}");
     }
 
     // -------------------------------------------------------
@@ -134,6 +161,13 @@ public class MultiplayerPlayerController : MonoBehaviour
             ReactionPressed = true;
     }
 
+
+    public void OnBlock(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started)   BlockHeld = true;
+        if (ctx.canceled)  BlockHeld = false;
+    }
+
     // -------------------------------------------------------
     // movement stuff
     // -------------------------------------------------------
@@ -165,7 +199,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         cc.Move(move * moveSpeed * Time.deltaTime);
 
-        // flip the visual slot to face movement direction — don't flip the root (breaks CC learnt that the hard wy)
+        // flip the visual slot to face movement direction — don't flip the root (breaks CC learnt that the hard way lol)
         if (move.x != 0f && characterVisualSlot != null)
         {
             characterVisualSlot.localScale = new Vector3(
@@ -185,7 +219,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     }
 
     // -------------------------------------------------------
-    // debug gizmos — shows ground check 
+    // debug gizmos ..... will add more later, just ground check for now.. range n stuff is easy to mess up and not notice without a visual
     // -------------------------------------------------------
 
     private void OnDrawGizmosSelected()
