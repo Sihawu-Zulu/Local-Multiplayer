@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 // PlayerInput component should use the MultiControls asset, action map CALLED PlayerControls
 // player 1 gets controller slot 0, player 2 gets controller slot 1 — unity handles this automatically
 // PlayerInputManager assigns whichever controller joined first/second
+// PlayerID is set in OnEnable (not Awake) so it's guaranteed ready before any other script's Start runs
 
 [RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(CharacterController))]
@@ -53,7 +54,17 @@ public class MultiplayerPlayerController : MonoBehaviour
     {
         cc          = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
-        PlayerID    = playerInput.playerIndex + 1;
+        // don't read playerIndex here — PlayerInput hasn't been fully initialised yet on dynamic spawn
+    }
+
+    private void OnEnable()
+    {
+        // OnEnable runs after PlayerInputManager has assigned the device and index
+        // so playerIndex is reliable here — this is the correct place to set PlayerID
+        if (playerInput != null)
+            PlayerID = playerInput.playerIndex + 1;
+
+        Debug.Log($"[P{PlayerID}] OnEnable — PlayerID confirmed");
     }
 
     private void Start()
@@ -114,10 +125,10 @@ public class MultiplayerPlayerController : MonoBehaviour
     // input callbacks
     // -------------------------------------------------------
 
-    public void OnMove(InputAction.CallbackContext ctx)             { moveInput = ctx.ReadValue<Vector2>(); }
-    public void OnLightAttack(InputAction.CallbackContext ctx)      { if (ctx.started) LightAttackPressed = true; }
-    public void OnHeavyAttack(InputAction.CallbackContext ctx)      { if (ctx.started) HeavyAttackPressed = true; }
-    public void OnReactionTrigger(InputAction.CallbackContext ctx)  { if (ctx.started) ReactionPressed    = true; }
+    public void OnMove(InputAction.CallbackContext ctx)            { moveInput = ctx.ReadValue<Vector2>(); }
+    public void OnLightAttack(InputAction.CallbackContext ctx)     { if (ctx.started) LightAttackPressed = true; }
+    public void OnHeavyAttack(InputAction.CallbackContext ctx)     { if (ctx.started) HeavyAttackPressed = true; }
+    public void OnReactionTrigger(InputAction.CallbackContext ctx) { if (ctx.started) ReactionPressed    = true; }
 
     public void OnJump(InputAction.CallbackContext ctx)
     {
@@ -166,6 +177,7 @@ public class MultiplayerPlayerController : MonoBehaviour
         Vector3 finalMove = horizontal * moveSpeed + Vector3.up * verticalVelocity;
         cc.Move(finalMove * Time.deltaTime);
 
+        // flip visual slot only — never flip root (breaks CharacterController)
         if (horizontal.x != 0f && characterVisualSlot != null)
         {
             characterVisualSlot.localScale = new Vector3(

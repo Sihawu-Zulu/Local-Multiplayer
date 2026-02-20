@@ -4,8 +4,8 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 // sits on GameManager object
-// finds both players automatically via FindObjectsByType at Start
-// no runtime reference passing — builds correctly
+// finds both players via FindObjectsByType — retries every frame until both are found
+// subscribes to health events once found — works correctly with dynamic PlayerInputManager spawning
 
 public class KillerShotManager : MonoBehaviour
 {
@@ -19,18 +19,19 @@ public class KillerShotManager : MonoBehaviour
     // --- events ---
     public UnityEvent        OnKillerShotPhaseStarted;
     public UnityEvent        OnKillerShotPhaseEnded;
-    public UnityEvent<int>   OnKillerShotWinner;        // int = winner player ID
+    public UnityEvent<int>   OnKillerShotWinner;
     public UnityEvent        OnKillerShotExpired;
-    public UnityEvent<int>   OnEarlyPress;              // int = player who pressed early
-    public UnityEvent<int>   OnPerfectPress;            // int = player who got perfect
+    public UnityEvent<int>   OnEarlyPress;
+    public UnityEvent<int>   OnPerfectPress;
 
-    // --- resolved at Start ---
+    // --- resolved once both players are found ---
     private PlayerHealth                p1Health;
     private PlayerHealth                p2Health;
     private MultiplayerPlayerController p1Controller;
     private MultiplayerPlayerController p2Controller;
     private CombatSystem                p1Combat;
     private CombatSystem                p2Combat;
+    private bool                        playersResolved = false;
 
     // --- state ---
     private bool      killerShotActive    = false;
@@ -49,51 +50,12 @@ public class KillerShotManager : MonoBehaviour
 
     // -------------------------------------------------------
 
-    private void Start()
-    {
-        ResolvePlayerReferences();
-    }
-
-    private void ResolvePlayerReferences()
-    {
-        var controllers = FindObjectsByType<MultiplayerPlayerController>(FindObjectsSortMode.None);
-
-        foreach (var c in controllers)
-        {
-            if (c.PlayerID == 1)
-            {
-                p1Controller = c;
-                p1Health     = c.GetComponent<PlayerHealth>();
-                p1Combat     = c.GetComponent<CombatSystem>();
-            }
-            else if (c.PlayerID == 2)
-            {
-                p2Controller = c;
-                p2Health     = c.GetComponent<PlayerHealth>();
-                p2Combat     = c.GetComponent<CombatSystem>();
-            }
-        }
-
-        if (p1Health == null || p2Health == null)
-        {
-            Debug.LogWarning("[KillerShotManager] couldn't find both players at Start — will retry in Update");
-            return;
-        }
-
-        p1Health.OnKillerShotTriggered.AddListener(ActivateKillerShotPhase);
-        p2Health.OnKillerShotTriggered.AddListener(ActivateKillerShotPhase);
-
-        Debug.Log("[KillerShotManager] both players resolved — listening for killer shot triggers");
-
-        RefreshGamepads();
-    }
-
     private void Update()
     {
-        // retry resolution if players weren't found at Start (they join after GameManager starts)
-        if (p1Health == null || p2Health == null)
+        // keep trying until both players are in the scene with valid PlayerIDs
+        if (!playersResolved)
         {
-            ResolvePlayerReferences();
+            TryResolvePlayerReferences();
             return;
         }
 
@@ -112,9 +74,39 @@ public class KillerShotManager : MonoBehaviour
         bool p1Valid = p1Pressed && !p1PressedEarly;
         bool p2Valid = p2Pressed && !p2PressedEarly;
 
-        if      (p1Valid && p2Valid) ResolveKillerShot(1);     // simultaneous — P1 tiebreak
+        if      (p1Valid && p2Valid) ResolveKillerShot(1);
         else if (p1Valid)          { CheckPerfect(1); ResolveKillerShot(1); }
         else if (p2Valid)          { CheckPerfect(2); ResolveKillerShot(2); }
+    }
+
+    // -------------------------------------------------------
+    // player resolution — retries until BOTH players have a valid PlayerID
+    // -------------------------------------------------------
+
+    private void TryResolvePlayerReferences()
+    {
+        var controllers = FindObjectsByType<MultiplayerPlayerController>(FindObjectsSortMode.None);
+
+        p1Controller = null;
+        p2Controller = null;
+
+        foreach (var c in controllers)
+        {
+            if (c.PlayerID == 1)      { p1Controller = c; p1Health = c.GetComponent<PlayerHealth>(); p1Combat = c.GetComponent<CombatSystem>(); }
+            else if (c.PlayerID == 2) { p2Controller = c; p2Health = c.GetComponent<PlayerHealth>(); p2Combat = c.GetComponent<CombatSystem>(); }
+        }
+
+        // only mark resolved once BOTH players are found with valid IDs
+        if (p1Controller == null || p2Controller == null) return;
+
+        // subscribe to health events now that we have both
+        p1Health.OnKillerShotTriggered.AddListener(ActivateKillerShotPhase);
+        p2Health.OnKillerShotTriggered.AddListener(ActivateKillerShotPhase);
+
+        playersResolved = true;
+        RefreshGamepads();
+
+        Debug.Log("[KillerShotManager] both players resolved — ready");
     }
 
     // -------------------------------------------------------
@@ -144,7 +136,7 @@ public class KillerShotManager : MonoBehaviour
 
     private IEnumerator ReactionWindowRoutine()
     {
-        yield return new WaitForSeconds(0.5f);      // brief delay — punishes immediate mashers
+        yield return new WaitForSeconds(0.5f);  // brief delay before window opens
 
         reactionWindowOpen = true;
         Debug.Log("[KillerShot] window OPEN");
@@ -165,7 +157,7 @@ public class KillerShotManager : MonoBehaviour
             ReenableCombat();
             OnKillerShotExpired?.Invoke();
             OnKillerShotPhaseEnded?.Invoke();
-            Debug.Log("[KillerShot] expired — nobody reacted in time");
+            Debug.Log("[KillerShot] expired — nobody reacted");
         }
     }
 
@@ -195,7 +187,7 @@ public class KillerShotManager : MonoBehaviour
         OnKillerShotWinner?.Invoke(winnerID);
         OnKillerShotPhaseEnded?.Invoke();
 
-        Debug.Log($"[KillerShot] P{winnerID} wins the reaction!");
+        Debug.Log($"[KillerShot] P{winnerID} wins!");
     }
 
     private void ReenableCombat()
