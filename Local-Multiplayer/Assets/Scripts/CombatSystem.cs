@@ -1,15 +1,14 @@
 using System.Collections;
 using UnityEngine;
 
-// sits on Player ROOT prefab — same object as MultiplayerPlayerController and PlayerHealth
-// finds its opponent automatically via PlayerID at Start — no runtime SetOpponent() needed
-// this fixes the build issue where dynamic assignment wouldn't serialize
+// subscribes to controller's C# events directly — no frame flag timing issues
+// bypassRangeCheck = true so attacks always land until animations/hitboxes are ready by @sihawu & @jaiden
 
 public class CombatSystem : MonoBehaviour
 {
     [Header("Damage Values")]
-    [SerializeField] private float lightAttackDamage    = 10f;
-    [SerializeField] private float heavyAttackDamage    = 20f;
+    [SerializeField] private float lightAttackDamage = 10f;
+    [SerializeField] private float heavyAttackDamage  = 20f;
     [SerializeField] private float blockDamageReduction = 0.5f;
 
     [Header("Cooldowns")]
@@ -17,12 +16,14 @@ public class CombatSystem : MonoBehaviour
     [SerializeField] private float heavyAttackCooldown = 0.8f;
 
     [Header("Range")]
-    [SerializeField] private float attackRange = 2.5f;
+    [SerializeField] private float attackRange      = 2.5f;
+    [SerializeField] private bool  bypassRangeCheck = true;   
 
-    // --- resolved at Start via PlayerID ---
-    private PlayerHealth   myHealth;
-    private PlayerHealth   opponentHealth;
-    private CombatSystem   opponentCombat;
+
+    private PlayerHealth myHealth;
+    private PlayerHealth opponentHealth;
+    private CombatSystem opponentCombat;
+    private bool opponentLinked = false;
 
     // --- state ---
     public  bool IsBlocking   { get; private set; }
@@ -40,15 +41,49 @@ public class CombatSystem : MonoBehaviour
         controller = GetComponent<MultiplayerPlayerController>();
         myHealth   = GetComponent<PlayerHealth>();
 
-        if (controller == null) Debug.LogError($"[CombatSystem] {gameObject.name} — missing MultiplayerPlayerController on same object");
-        if (myHealth   == null) Debug.LogError($"[CombatSystem] {gameObject.name} — missing PlayerHealth on same object");
+        if (controller == null) Debug.LogError($"[CombatSystem] {gameObject.name} — MultiplayerPlayerController missing");
+        if (myHealth   == null) Debug.LogError($"[CombatSystem] {gameObject.name} — PlayerHealth missing");
     }
 
     private void Start()
     {
-        // find opponent by searching for all CombatSystems and picking the one with a different PlayerID
-        // works reliably as long as both players have spawned before Start runs
-        // PlayerInputManager spawns both before Start fires on either, so this is safe
+    
+        controller.OnLightAttackEvent += HandleLightAttack;
+        controller.OnHeavyAttackEvent += HandleHeavyAttack;
+
+        TryFindOpponent();
+    }
+
+    private void OnDestroy()
+    {
+        // always unsubscribe to avoid memory leaks lolll
+        if (controller != null)
+        {
+            controller.OnLightAttackEvent -= HandleLightAttack;
+            controller.OnHeavyAttackEvent -= HandleHeavyAttack;
+        }
+    }
+
+    private void Update()
+    {
+        // retry opponent link if not found yet — this allows for flexible scene setup and ensures we don't miss the link if one player spawns slightly after the other for any reason
+        if (!opponentLinked)
+        {
+            TryFindOpponent();
+            return;
+        }
+
+        if (!combatEnabled) return;
+
+        HandleBlock();
+    }
+
+    // -------------------------------------------------------
+    // opponent resolution
+    // -------------------------------------------------------
+
+    private void TryFindOpponent()
+    {
         var allCombat = FindObjectsByType<CombatSystem>(FindObjectsSortMode.None);
 
         foreach (var other in allCombat)
@@ -57,54 +92,41 @@ public class CombatSystem : MonoBehaviour
 
             opponentHealth = other.GetComponent<PlayerHealth>();
             opponentCombat = other;
+            opponentLinked = true;
+
+           
             break;
         }
-
-        if (opponentHealth == null)
-            Debug.LogWarning($"[P{controller.PlayerID} CombatSystem] opponent not found at Start — if only one player has spawned yet this is expected, will resolve when P2 joins");
-        else
-            Debug.Log($"[P{controller.PlayerID} CombatSystem] opponent linked at Start — combat ready");
-    }
-
-    private void Update()
-    {
-        // lazy re-resolve in case opponent spawned after this player's Start
-        if (opponentHealth == null)
-            TryFindOpponent();
-
-        if (!combatEnabled) return;
-
-        HandleBlock();
-        HandleLightAttack();
-        HandleHeavyAttack();
     }
 
     // -------------------------------------------------------
-    // block
+    // block — still checked in Update since it's a held state
     // -------------------------------------------------------
 
     private void HandleBlock()
     {
         IsBlocking = controller.BlockHeld && !IsAttacking;
 
-        // swap for animator.SetBool("IsBlocking", IsBlocking) when animations ready
+        // will put for animator.SetBool("IsBlocking", IsBlocking) 
         if (IsBlocking)
             Debug.Log($"[P{controller.PlayerID}] BLOCKING");
     }
 
     // -------------------------------------------------------
-    // attacks
+    // attacks — called directly from C# event, not Update
     // -------------------------------------------------------
 
     private void HandleLightAttack()
     {
-        if (!controller.LightAttackPressed || !canLight || IsBlocking) return;
+        if (!combatEnabled || !opponentLinked) return;
+        if (!canLight || IsBlocking) return;
         StartCoroutine(PerformAttack(lightAttackDamage, lightAttackCooldown, "LIGHT"));
     }
 
     private void HandleHeavyAttack()
     {
-        if (!controller.HeavyAttackPressed || !canHeavy || IsBlocking) return;
+        if (!combatEnabled || !opponentLinked) return;
+        if (!canHeavy || IsBlocking) return;
         StartCoroutine(PerformAttack(heavyAttackDamage, heavyAttackCooldown, "HEAVY"));
     }
 
@@ -115,33 +137,31 @@ public class CombatSystem : MonoBehaviour
         if (type == "LIGHT") canLight = false;
         else                  canHeavy = false;
 
-        // swap for animator.SetTrigger("LightAttack") / ("HeavyAttack") when animations ready
+        // will use for animator.SetTrigger("LightAttack") / ("HeavyAttack") 
         Debug.Log($"[P{controller.PlayerID}] {type} ATTACK");
 
-        if (opponentHealth != null && IsInRange())
+        bool inRange = bypassRangeCheck || IsInRange();
+
+        if (inRange)
         {
             float final = damage;
 
             if (opponentCombat != null && opponentCombat.IsBlocking)
             {
                 final *= (1f - blockDamageReduction);
-                Debug.Log($"[P{controller.PlayerID}] {type} BLOCKED — reduced to {final}");
+              
             }
 
             opponentHealth.TakeDamage(final);
-            Debug.Log($"[P{controller.PlayerID}] {type} hit for {final} — opponent HP: {opponentHealth.CurrentHealth}");
-        }
-        else if (opponentHealth == null)
-        {
-            Debug.LogWarning($"[P{controller.PlayerID}] {type} — no opponent found yet");
+            // Debug.Log($"[P{controller.PlayerID}] {type} dealt {final} — opponent HP: {opponentHealth.CurrentHealth}/{opponentHealth.MaxHealth}");
         }
         else
         {
             float dist = Vector3.Distance(transform.position, opponentHealth.transform.position);
-            Debug.Log($"[P{controller.PlayerID}] {type} whiffed — dist {dist:F2} > range {attackRange}");
+           
         }
 
-        // 0.1s active frames — replace with animation event later
+        // 0.1s active frames placeholder — replace with animation event later
         yield return new WaitForSeconds(0.1f);
         IsAttacking = false;
 
@@ -161,21 +181,6 @@ public class CombatSystem : MonoBehaviour
         return Vector3.Distance(transform.position, opponentHealth.transform.position) <= attackRange;
     }
 
-    // called each Update frame until opponent is found — handles late spawn case
-    private void TryFindOpponent()
-    {
-        var allCombat = FindObjectsByType<CombatSystem>(FindObjectsSortMode.None);
-
-        foreach (var other in allCombat)
-        {
-            if (other == this) continue;
-            opponentHealth = other.GetComponent<PlayerHealth>();
-            opponentCombat = other;
-            Debug.Log($"[P{controller.PlayerID} CombatSystem] opponent found via Update — combat ready");
-            break;
-        }
-    }
-
     // called by KillerShotManager during reaction window
     public void SetCombatEnabled(bool enabled)
     {
@@ -187,6 +192,6 @@ public class CombatSystem : MonoBehaviour
             IsAttacking = false;
         }
 
-        Debug.Log($"[P{controller.PlayerID}] combat {(enabled ? "ENABLED" : "DISABLED")}");
+        // Debug.Log($"[P{controller.PlayerID}] combat {(enabled ? "ENABLED" : "DISABLED")}");
     }
 }

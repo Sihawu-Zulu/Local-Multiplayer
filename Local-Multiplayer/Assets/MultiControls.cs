@@ -143,7 +143,7 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
                     ""id"": ""d5430c72-84f9-4a97-8fea-b1c90dac2f90"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Hold"",
                     ""initialStateCheck"": false
                 }
             ],

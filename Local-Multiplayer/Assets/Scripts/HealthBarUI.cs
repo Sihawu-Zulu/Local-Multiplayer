@@ -3,11 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// sits on the HUD Canvas object
-// Tekken 7 style — P1 bar fills left to right, P2 bar fills right to left (mirrored inward)
-// colour shifts gold -> orange -> red as health drops
-// round pips show which player won each round (filled = won, empty = not yet)
-// wire OnRoundStarted, OnScoreUpdated, OnRoundWon from RoundManager in inspector
 
 public class HealthBarUI : MonoBehaviour
 {
@@ -18,12 +13,12 @@ public class HealthBarUI : MonoBehaviour
     [System.Serializable]
     public class PlayerHUD
     {
-        public Slider          healthSlider;        // the main health bar
-        public Image           fillImage;           // fill image on slider — gets colour shifted
-        public Image           avatarImage;         // portrait
-        public TextMeshProUGUI nameText;            // character name label
-        public TextMeshProUGUI currentHealthText;   // live HP number e.g. "73"
-        public Image[]         roundPips;           // array of pip images — one per possible round (set up 2 in inspector)
+        public Slider healthSlider;  
+        public Image  fillImage;     
+        public Image avatarImage;     
+        public TextMeshProUGUI nameText;          
+        public TextMeshProUGUI currentHealthText;   
+        public Image[] roundPips;           
     }
 
     [Header("Player HUDs")]
@@ -31,13 +26,13 @@ public class HealthBarUI : MonoBehaviour
     [SerializeField] private PlayerHUD p2HUD;
 
     [Header("Health Colours")]
-    [SerializeField] private Color healthHigh = new Color(0.9f, 0.75f, 0.1f);   // gold — full health
-    [SerializeField] private Color healthMid  = new Color(0.95f, 0.5f, 0.05f);  // orange — mid
-    [SerializeField] private Color healthLow  = new Color(0.85f, 0.1f, 0.1f);   // red — killer shot zone
+    [SerializeField] private Color healthHigh = new Color(0.9f, 0.75f, 0.1f); 
+    [SerializeField] private Color healthMid  = new Color(0.95f, 0.5f, 0.05f); 
+    [SerializeField] private Color healthLow  = new Color(0.85f, 0.1f, 0.1f);  
 
     [Header("Round Pip Colours")]
-    [SerializeField] private Color pipWon   = new Color(1f, 0.8f, 0f);          // gold — round won
-    [SerializeField] private Color pipEmpty = new Color(0.25f, 0.25f, 0.25f);   // dark grey — not yet won
+    [SerializeField] private Color pipWon   = new Color(1f, 0.8f, 0f); 
+    [SerializeField] private Color pipEmpty = new Color(0.25f, 0.25f, 0.25f); 
 
     [Header("Round Counter")]
     [SerializeField] private TextMeshProUGUI roundCounterText;
@@ -47,7 +42,7 @@ public class HealthBarUI : MonoBehaviour
     [SerializeField] private Color flashColor    = Color.white;
 
     // -------------------------------------------------------
-    // called by HealthBarInitialiser (scene object) once both players have spawned
+    // called by HealthBarInitialiser  once both players have spawned
     // -------------------------------------------------------
 
     public void InitialiseHUD(PlayerHealth p1Health, PlayerHealth p2Health,
@@ -57,11 +52,11 @@ public class HealthBarUI : MonoBehaviour
         SetupHUDDisplay(p1HUD, p1Health, p1Avatar, p1Name);
         SetupHUDDisplay(p2HUD, p2Health, p2Avatar, p2Name);
 
-        // reset all pips to empty
+
         ResetPips(p1HUD);
         ResetPips(p2HUD);
 
-        // subscribe to live health changes
+
         p1Health.OnHealthChanged.AddListener((cur, max) => OnHealthChanged(p1HUD, cur, max));
         p2Health.OnHealthChanged.AddListener((cur, max) => OnHealthChanged(p2HUD, cur, max));
     }
@@ -91,11 +86,11 @@ public class HealthBarUI : MonoBehaviour
         float t = Mathf.Clamp01(current / max);
         hud.healthSlider.value = t;
 
-        // live HP number
+      
         if (hud.currentHealthText != null)
             hud.currentHealthText.text = Mathf.CeilToInt(current).ToString();
 
-        // colour shift gold -> orange -> red
+      
         if (hud.fillImage != null)
         {
             Color c = t > 0.5f
@@ -116,9 +111,6 @@ public class HealthBarUI : MonoBehaviour
         hud.fillImage.color = original;
     }
 
-    // -------------------------------------------------------
-    // round pips — wire OnScoreUpdated (RoundManager) to UpdateScore
-    // -------------------------------------------------------
 
     public void UpdateScore(int p1Wins, int p2Wins)
     {
@@ -142,9 +134,6 @@ public class HealthBarUI : MonoBehaviour
         UpdatePips(hud, 0);
     }
 
-    // -------------------------------------------------------
-    // round counter — wire OnRoundStarted (RoundManager) to UpdateRoundCounter
-    // -------------------------------------------------------
 
     public void UpdateRoundCounter(int roundNumber)
     {

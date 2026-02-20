@@ -1,70 +1,70 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// PlayerInput component should use the MultiControls asset, action map CALLED PlayerControls
+
 // player 1 gets controller slot 0, player 2 gets controller slot 1 — unity handles this automatically
-// PlayerInputManager assigns whichever controller joined first/second
-// PlayerID is set in OnEnable (not Awake) so it's guaranteed ready before any other script's Start runs
+// attacks use C# events (not frame flags) so execution order doesn't matter nomore
 
 [RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(CharacterController))]
 public class MultiplayerPlayerController : MonoBehaviour
 {
-    // --- movement ---
+
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float gravity   = -18f;
 
-    // --- ground check ---
+
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float     groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
 
-    // --- character visuals ---
+
     [Header("Character Setup")]
     [SerializeField] private Transform  characterVisualSlot;
     [SerializeField] private GameObject p1CharacterPrefab;
     [SerializeField] private GameObject p2CharacterPrefab;
 
-    // --- spawn points ---
+
     [Header("Spawn Points")]
     [SerializeField] private Transform p1SpawnPoint;
     [SerializeField] private Transform p2SpawnPoint;
 
     // --- private ---
     private CharacterController cc;
-    private PlayerInput         playerInput;
-    private Vector2             moveInput;
-    private float               verticalVelocity;
-    private bool                isGrounded;
-    private bool                jumpQueued;
+    private PlayerInput playerInput;
+    private Vector2 moveInput;
+    private float verticalVelocity;
+    private bool isGrounded;
+    private bool jumpQueued;
 
-    // --- public ---
-    public int  PlayerID           { get; private set; }
-    public bool LightAttackPressed { get; private set; }
-    public bool HeavyAttackPressed { get; private set; }
-    public bool ReactionPressed    { get; private set; }
-    public bool BlockHeld          { get; private set; }
+    // --- public id ---
+    public int PlayerID { get; private set; }
+
+       public event Action OnLightAttackEvent;
+    public event Action OnHeavyAttackEvent;
+    public event Action OnReactionEvent;
+
+
+    public bool BlockHeld { get; private set; }
 
     // -------------------------------------------------------
 
     private void Awake()
     {
-        cc          = GetComponent<CharacterController>();
+        cc  = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
-        // don't read playerIndex here — PlayerInput hasn't been fully initialised yet on dynamic spawn
     }
 
     private void OnEnable()
     {
-        // OnEnable runs after PlayerInputManager has assigned the device and index
-        // so playerIndex is reliable here — this is the correct place to set PlayerID
         if (playerInput != null)
             PlayerID = playerInput.playerIndex + 1;
 
-        Debug.Log($"[P{PlayerID}] OnEnable — PlayerID confirmed");
+        Debug.Log($"[P{PlayerID}] OnEnable... PlayerID confirmed");
     }
 
     private void Start()
@@ -79,10 +79,6 @@ public class MultiplayerPlayerController : MonoBehaviour
         ApplyGravity();
         HandleJump();
         MoveCharacter();
-
-        LightAttackPressed = false;
-        HeavyAttackPressed = false;
-        ReactionPressed    = false;
     }
 
     // -------------------------------------------------------
@@ -99,12 +95,12 @@ public class MultiplayerPlayerController : MonoBehaviour
             return;
         }
 
-        cc.enabled         = false;
+        cc.enabled = false;
         transform.position = sp.position;
         transform.rotation = sp.rotation;
-        cc.enabled         = true;
+        cc.enabled  = true;
 
-        Debug.Log($"[P{PlayerID}] moved to spawn: {sp.position}");
+       
     }
 
     private void SpawnCharacterVisual()
@@ -113,7 +109,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         if (prefab == null || characterVisualSlot == null)
         {
-            Debug.LogWarning($"[P{PlayerID}] character prefab or visual slot not assigned");
+            // Debug.LogWarning($"[P{PlayerID}] character prefab or visual slot not assigned");
             return;
         }
 
@@ -122,23 +118,47 @@ public class MultiplayerPlayerController : MonoBehaviour
     }
 
     // -------------------------------------------------------
-    // input callbacks
+    // input callbacks 
     // -------------------------------------------------------
 
-    public void OnMove(InputAction.CallbackContext ctx)            { moveInput = ctx.ReadValue<Vector2>(); }
-    public void OnLightAttack(InputAction.CallbackContext ctx)     { if (ctx.started) LightAttackPressed = true; }
-    public void OnHeavyAttack(InputAction.CallbackContext ctx)     { if (ctx.started) HeavyAttackPressed = true; }
-    public void OnReactionTrigger(InputAction.CallbackContext ctx) { if (ctx.started) ReactionPressed    = true; }
+    public void OnMove(InputAction.CallbackContext ctx)
+    {
+        moveInput = ctx.ReadValue<Vector2>();
+    }
 
     public void OnJump(InputAction.CallbackContext ctx)
     {
         if (ctx.started && isGrounded) jumpQueued = true;
     }
 
+    public void OnLightAttack(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            Debug.Log($"[P{PlayerID}] OnLightAttack pressed");
+            OnLightAttackEvent?.Invoke();
+        }
+    }
+
+    public void OnHeavyAttack(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            Debug.Log($"[P{PlayerID}] OnHeavyAttack presseed");
+            OnHeavyAttackEvent?.Invoke();
+        }
+    }
+
     public void OnBlock(InputAction.CallbackContext ctx)
     {
         if (ctx.started)  BlockHeld = true;
         if (ctx.canceled) BlockHeld = false;
+    }
+
+    public void OnReactionTrigger(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started)
+            OnReactionEvent?.Invoke();
     }
 
     // -------------------------------------------------------
@@ -177,7 +197,7 @@ public class MultiplayerPlayerController : MonoBehaviour
         Vector3 finalMove = horizontal * moveSpeed + Vector3.up * verticalVelocity;
         cc.Move(finalMove * Time.deltaTime);
 
-        // flip visual slot only — never flip root (breaks CharacterController)
+        
         if (horizontal.x != 0f && characterVisualSlot != null)
         {
             characterVisualSlot.localScale = new Vector3(
@@ -189,7 +209,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     }
 
     // -------------------------------------------------------
-    // gizmos
+    // gizmos 4 visualizingg
     // -------------------------------------------------------
 
     private void OnDrawGizmosSelected()
