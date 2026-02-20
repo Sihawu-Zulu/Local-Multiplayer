@@ -132,10 +132,19 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
                     ""name"": ""ReactionTrigger"",
                     ""type"": ""Value"",
                     ""id"": ""8f8bca7c-8769-4c13-b4be-25dbf86b7fe0"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Block"",
+                    ""type"": ""Button"",
+                    ""id"": ""d5430c72-84f9-4a97-8fea-b1c90dac2f90"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -292,6 +301,17 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
                     ""action"": ""ReactionTrigger"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""59ff07de-f425-45da-a74f-160fce9b6af0"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Block"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -305,6 +325,7 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
         m_PlayerControls_HeavyAttack = m_PlayerControls.FindAction("HeavyAttack", throwIfNotFound: true);
         m_PlayerControls_LightAttack = m_PlayerControls.FindAction("LightAttack", throwIfNotFound: true);
         m_PlayerControls_ReactionTrigger = m_PlayerControls.FindAction("ReactionTrigger", throwIfNotFound: true);
+        m_PlayerControls_Block = m_PlayerControls.FindAction("Block", throwIfNotFound: true);
     }
 
     ~@MultiControls()
@@ -390,6 +411,7 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerControls_HeavyAttack;
     private readonly InputAction m_PlayerControls_LightAttack;
     private readonly InputAction m_PlayerControls_ReactionTrigger;
+    private readonly InputAction m_PlayerControls_Block;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerControls".
     /// </summary>
@@ -421,6 +443,10 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "PlayerControls/ReactionTrigger".
         /// </summary>
         public InputAction @ReactionTrigger => m_Wrapper.m_PlayerControls_ReactionTrigger;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerControls/Block".
+        /// </summary>
+        public InputAction @Block => m_Wrapper.m_PlayerControls_Block;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -462,6 +488,9 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
             @ReactionTrigger.started += instance.OnReactionTrigger;
             @ReactionTrigger.performed += instance.OnReactionTrigger;
             @ReactionTrigger.canceled += instance.OnReactionTrigger;
+            @Block.started += instance.OnBlock;
+            @Block.performed += instance.OnBlock;
+            @Block.canceled += instance.OnBlock;
         }
 
         /// <summary>
@@ -488,6 +517,9 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
             @ReactionTrigger.started -= instance.OnReactionTrigger;
             @ReactionTrigger.performed -= instance.OnReactionTrigger;
             @ReactionTrigger.canceled -= instance.OnReactionTrigger;
+            @Block.started -= instance.OnBlock;
+            @Block.performed -= instance.OnBlock;
+            @Block.canceled -= instance.OnBlock;
         }
 
         /// <summary>
@@ -563,5 +595,12 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnReactionTrigger(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Block" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnBlock(InputAction.CallbackContext context);
     }
 }

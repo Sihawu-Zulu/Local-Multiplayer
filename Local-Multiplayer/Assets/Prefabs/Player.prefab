@@ -44,8 +44,10 @@ GameObject:
   - component: {fileID: 7982465004883456596}
   - component: {fileID: 5150425666370274308}
   - component: {fileID: 3157568718681044281}
-  - component: {fileID: 3335410392899374589}
   - component: {fileID: 3532998573399416451}
+  - component: {fileID: 3335410392899374589}
+  - component: {fileID: 2810751942479351812}
+  - component: {fileID: 2274413457630315643}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -176,6 +178,31 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: -0.15, z: 0}
+--- !u!114 &3532998573399416451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851244460066674257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1042f4248b961b148a96735a0f36191d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerPlayerController
+  moveSpeed: 6
+  jumpForce: 10
+  gravity: -18
+  groundCheck: {fileID: 1157071863427506494}
+  groundCheckRadius: 0.2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  characterVisualSlot: {fileID: 5538308211578461374}
+  p1CharacterPrefab: {fileID: 1918950375905787413, guid: 386c4f181fc038546b2b1187b4200972, type: 3}
+  p2CharacterPrefab: {fileID: 2486076501504409559, guid: 34cdfeefbcd59804fa697e6e88b9a298, type: 3}
+  p1SpawnPoint: {fileID: 4454348630188849062}
+  p2SpawnPoint: {fileID: 7711290544756216165}
 --- !u!114 &3335410392899374589
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,12 +308,28 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 8f8bca7c-8769-4c13-b4be-25dbf86b7fe0
     m_ActionName: PlayerControls/ReactionTrigger
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3532998573399416451}
+        m_TargetAssemblyTypeName: MultiplayerPlayerController, Assembly-CSharp
+        m_MethodName: OnBlock
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: d5430c72-84f9-4a97-8fea-b1c90dac2f90
+    m_ActionName: 'PlayerControls/Block[/XInputControllerWindows/leftTrigger,/DualShock4GamepadHID/leftTrigger]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: PlayerControls
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &3532998573399416451
+--- !u!114 &2810751942479351812
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -295,22 +338,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 1851244460066674257}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1042f4248b961b148a96735a0f36191d, type: 3}
+  m_Script: {fileID: 11500000, guid: 233b4a24df567a446a15f3dc27eea540, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerPlayerController
-  moveSpeed: 6
-  jumpForce: 8
-  gravity: -18
-  groundCheck: {fileID: 1157071863427506494}
-  groundCheckRadius: 0.2
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  characterVisualSlot: {fileID: 5538308211578461374}
-  p1CharacterPrefab: {fileID: 1918950375905787413, guid: 386c4f181fc038546b2b1187b4200972, type: 3}
-  p2CharacterPrefab: {fileID: 2486076501504409559, guid: 34cdfeefbcd59804fa697e6e88b9a298, type: 3}
-  p1SpawnPoint: {fileID: 4454348630188849062}
-  p2SpawnPoint: {fileID: 7711290544756216165}
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  maxHealth: 100
+  killerShotThreshold: 30
+  killerShotDamage: 60
+  OnHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnKillerShotTriggered:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPlayerDefeated:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &2274413457630315643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851244460066674257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8b9b087a68121348a755c3b4902bb3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatSystem
+  myHealth: {fileID: 2810751942479351812}
+  lightAttackDamage: 10
+  heavyAttackDamage: 20
+  blockDamageReduction: 0.5
+  lightAttackCooldown: 0.4
+  heavyAttackCooldown: 0.8
+  attackRange: 1.5
 --- !u!1 &3178662676928722422
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,7 +430,7 @@ Transform:
   m_GameObject: {fileID: 4113089291358175801}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.59, z: 0}
+  m_LocalPosition: {x: 0, y: -0.95, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

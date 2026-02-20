@@ -1,30 +1,29 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
 // PlayerInput component should use the MultiControls asset, action map CALLED PlayerControls
-// player 1 gets controller slot 0, player 2 gets controller slot 1 — unity handles this automatically.. THANK GOD it works!!
-// when you spawn each player, PlayerInputManager assigns whichever controller joined first/second
+// player 1 gets controller slot 0, player 2 gets controller slot 1 — unity handles this automatically
+// PlayerInputManager assigns whichever controller joined first/second
 
 [RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(CharacterController))]
 public class MultiplayerPlayerController : MonoBehaviour
 {
-    // --- movement stuff ---
+    // --- movement ---
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float jumpForce = 5f;
-    [SerializeField] private float gravity = -18f;
+    [SerializeField] private float gravity   = -18f;
 
     // --- ground check ---
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private float     groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
 
     // --- character visuals ---
     [Header("Character Setup")]
-    [SerializeField] private Transform characterVisualSlot;
+    [SerializeField] private Transform  characterVisualSlot;
     [SerializeField] private GameObject p1CharacterPrefab;
     [SerializeField] private GameObject p2CharacterPrefab;
 
@@ -33,25 +32,19 @@ public class MultiplayerPlayerController : MonoBehaviour
     [SerializeField] private Transform p1SpawnPoint;
     [SerializeField] private Transform p2SpawnPoint;
 
-
+    // --- private ---
     private CharacterController cc;
-    private PlayerInput playerInput;
+    private PlayerInput         playerInput;
+    private Vector2             moveInput;
+    private float               verticalVelocity;
+    private bool                isGrounded;
+    private bool                jumpQueued;
 
-    private Vector2 moveInput;
-    private Vector3 velocity;
-    private bool isGrounded;
-    private bool jumpQueued;
-
-
-    public int PlayerID { get; private set; }
-
-    // --- single frame press flags (reset every Update) ---
+    // --- public ---
+    public int  PlayerID           { get; private set; }
     public bool LightAttackPressed { get; private set; }
     public bool HeavyAttackPressed { get; private set; }
     public bool ReactionPressed    { get; private set; }
-
-    // --- held flag (stays true while button is held) ---
-    // CombatController will read this every frame to know if blocking is active... will add later
     public bool BlockHeld          { get; private set; }
 
     // -------------------------------------------------------
@@ -60,9 +53,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     {
         cc          = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
-
-        // grab player index from the PlayerInput component (0 = p1, 1 = p2)
-        PlayerID = playerInput.playerIndex + 1;
+        PlayerID    = playerInput.playerIndex + 1;
     }
 
     private void Start()
@@ -74,158 +65,127 @@ public class MultiplayerPlayerController : MonoBehaviour
     private void Update()
     {
         CheckGround();
-        HandleGravity();
-        HandleMovement();
+        ApplyGravity();
         HandleJump();
+        MoveCharacter();
 
-        // reset single-frame flags — BlockHeld is NOT reset here.....it stays until released
         LightAttackPressed = false;
         HeavyAttackPressed = false;
         ReactionPressed    = false;
     }
 
+    // -------------------------------------------------------
+    // spawn
+    // -------------------------------------------------------
 
     private void MoveToSpawnPoint()
     {
-        Transform spawnPoint = PlayerID == 1 ? p1SpawnPoint : p2SpawnPoint;
+        Transform sp = PlayerID == 1 ? p1SpawnPoint : p2SpawnPoint;
 
-        if (spawnPoint == null)
+        if (sp == null)
         {
-            Debug.LogWarning($"[Player {PlayerID}] no spawn point assigned — staying at default position");
+            Debug.LogWarning($"[P{PlayerID}] no spawn point assigned");
             return;
         }
 
-     
-        cc.enabled = false;
-        transform.position = spawnPoint.position;
-        transform.rotation = spawnPoint.rotation;
-        cc.enabled = true;
+        cc.enabled         = false;
+        transform.position = sp.position;
+        transform.rotation = sp.rotation;
+        cc.enabled         = true;
 
-        Debug.Log($"[Player {PlayerID}] moved to spawn point: {spawnPoint.position}");
+        Debug.Log($"[P{PlayerID}] moved to spawn: {sp.position}");
     }
-
-    // -------------------------------------------------------
-    // character visual setup
-    // -------------------------------------------------------
 
     private void SpawnCharacterVisual()
     {
-        GameObject prefabToSpawn = PlayerID == 1 ? p1CharacterPrefab : p2CharacterPrefab;
+        GameObject prefab = PlayerID == 1 ? p1CharacterPrefab : p2CharacterPrefab;
 
-        if (prefabToSpawn == null)
+        if (prefab == null || characterVisualSlot == null)
         {
-            
+            Debug.LogWarning($"[P{PlayerID}] character prefab or visual slot not assigned");
             return;
         }
 
-        if (characterVisualSlot == null)
-        {
-        
-            return;
-        }
-
-        Instantiate(prefabToSpawn, characterVisualSlot.position, characterVisualSlot.rotation, characterVisualSlot);
-        Debug.Log($"[Player {PlayerID}] spawned character: {prefabToSpawn.name}");
+        Instantiate(prefab, characterVisualSlot.position, characterVisualSlot.rotation, characterVisualSlot);
+        Debug.Log($"[P{PlayerID}] spawned: {prefab.name}");
     }
 
     // -------------------------------------------------------
     // input callbacks
     // -------------------------------------------------------
 
-    public void OnMove(InputAction.CallbackContext ctx)
-    {
-        moveInput = ctx.ReadValue<Vector2>();
-    }
+    public void OnMove(InputAction.CallbackContext ctx)             { moveInput = ctx.ReadValue<Vector2>(); }
+    public void OnLightAttack(InputAction.CallbackContext ctx)      { if (ctx.started) LightAttackPressed = true; }
+    public void OnHeavyAttack(InputAction.CallbackContext ctx)      { if (ctx.started) HeavyAttackPressed = true; }
+    public void OnReactionTrigger(InputAction.CallbackContext ctx)  { if (ctx.started) ReactionPressed    = true; }
 
     public void OnJump(InputAction.CallbackContext ctx)
     {
-        if (ctx.started && isGrounded)
-            jumpQueued = true;
+        if (ctx.started && isGrounded) jumpQueued = true;
     }
-
-    public void OnLightAttack(InputAction.CallbackContext ctx)
-    {
-        if (ctx.started)
-            LightAttackPressed = true;
-    }
-
-    public void OnHeavyAttack(InputAction.CallbackContext ctx)
-    {
-        if (ctx.started)
-            HeavyAttackPressed = true;
-    }
-
-    public void OnReactionTrigger(InputAction.CallbackContext ctx)
-    {
-        if (ctx.started)
-            ReactionPressed = true;
-    }
-
 
     public void OnBlock(InputAction.CallbackContext ctx)
     {
-        if (ctx.started)   BlockHeld = true;
-        if (ctx.canceled)  BlockHeld = false;
+        if (ctx.started)  BlockHeld = true;
+        if (ctx.canceled) BlockHeld = false;
     }
 
     // -------------------------------------------------------
-    // movement stuff
+    // movement — single cc.Move per frame
     // -------------------------------------------------------
 
     private void CheckGround()
     {
-        isGrounded = Physics.CheckSphere(
-            groundCheck != null ? groundCheck.position : transform.position + Vector3.down * 0.9f,
-            groundCheckRadius,
-            groundLayer
-        );
+        Vector3 pos = groundCheck != null
+            ? groundCheck.position
+            : transform.position + Vector3.down * 0.9f;
 
-        if (isGrounded && velocity.y < 0f)
-            velocity.y = -2f;
+        isGrounded = Physics.CheckSphere(pos, groundCheckRadius, groundLayer);
     }
 
-    private void HandleGravity()
+    private void ApplyGravity()
     {
-        velocity.y += gravity * Time.deltaTime;
-        cc.Move(velocity * Time.deltaTime);
+        if (isGrounded && verticalVelocity < 0f)
+            verticalVelocity = -2f;
+        else
+            verticalVelocity += gravity * Time.deltaTime;
     }
 
-    private void HandleMovement()
+    private void HandleJump()
     {
-        Vector3 move = new Vector3(moveInput.x, 0f, 0f);
+        if (!jumpQueued) return;
+        verticalVelocity = jumpForce;
+        jumpQueued       = false;
+    }
 
-        if (move.magnitude > 1f)
-            move.Normalize();
+    private void MoveCharacter()
+    {
+        Vector3 horizontal = new Vector3(moveInput.x, 0f, 0f);
+        if (horizontal.magnitude > 1f) horizontal.Normalize();
 
-        cc.Move(move * moveSpeed * Time.deltaTime);
+        Vector3 finalMove = horizontal * moveSpeed + Vector3.up * verticalVelocity;
+        cc.Move(finalMove * Time.deltaTime);
 
-        // flip the visual slot to face movement direction — don't flip the root (breaks CC learnt that the hard way lol)
-        if (move.x != 0f && characterVisualSlot != null)
+        if (horizontal.x != 0f && characterVisualSlot != null)
         {
             characterVisualSlot.localScale = new Vector3(
-                Mathf.Sign(move.x) * Mathf.Abs(characterVisualSlot.localScale.x),
+                Mathf.Sign(horizontal.x) * Mathf.Abs(characterVisualSlot.localScale.x),
                 characterVisualSlot.localScale.y,
                 characterVisualSlot.localScale.z
             );
         }
     }
 
-    private void HandleJump()
-    {
-        if (!jumpQueued) return;
-
-        velocity.y = jumpForce;
-        jumpQueued = false;
-    }
-
     // -------------------------------------------------------
-    // debug gizmos ..... will add more later, just ground check for now.. range n stuff is easy to mess up and not notice without a visual
+    // gizmos
     // -------------------------------------------------------
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
-        Vector3 pos = groundCheck != null ? groundCheck.position : transform.position + Vector3.down * 0.9f;
+        Vector3 pos = groundCheck != null
+            ? groundCheck.position
+            : transform.position + Vector3.down * 0.9f;
         Gizmos.DrawWireSphere(pos, groundCheckRadius);
     }
 }
