@@ -194,4 +194,14 @@ public class CombatSystem : MonoBehaviour
 
         // Debug.Log($"[P{controller.PlayerID}] combat {(enabled ? "ENABLED" : "DISABLED")}");
     }
+
+    private void OnDrawGizmosSelected()
+    {
+         Gizmos.color = Color.purple;
+Vector3 pos = transform.position + Vector3.down * 0.9f;
+
+    Gizmos.DrawWireSphere(pos, attackRange);
+
+
+    }
 }

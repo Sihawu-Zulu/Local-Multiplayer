@@ -383,7 +383,7 @@ MonoBehaviour:
   blockDamageReduction: 0.5
   lightAttackCooldown: 0.4
   heavyAttackCooldown: 0.8
-  attackRange: 1.5
+  attackRange: 0.5
   bypassRangeCheck: 1
 --- !u!1 &3178662676928722422
 GameObject:
