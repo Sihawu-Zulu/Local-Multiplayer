@@ -2,15 +2,10 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
-// player 1 gets controller slot 0, player 2 gets controller slot 1 — unity handles this automatically
-// attacks use C# events (not frame flags) so execution order doesn't matter nomore
-
 [RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(CharacterController))]
 public class MultiplayerPlayerController : MonoBehaviour
 {
-
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float jumpForce = 5f;
@@ -48,7 +43,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     public event Action OnHeavyAttackEvent;
     public event Action OnReactionEvent;
 
-
+    private bool movementEnabled = false;  
     public bool BlockHeld { get; private set; }
 
     // -------------------------------------------------------
@@ -75,6 +70,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (!movementEnabled) return;
         CheckGround();
         ApplyGravity();
         HandleJump();
@@ -207,6 +203,18 @@ public class MultiplayerPlayerController : MonoBehaviour
             );
         }
     }
+
+    public void SetMovementEnabled(bool enabled)
+{
+    movementEnabled = enabled;
+
+    if (!enabled)
+    {
+        moveInput        = Vector2.zero;
+        verticalVelocity = 0f;
+        jumpQueued       = false;
+    }
+}
 
     // -------------------------------------------------------
     // gizmos 4 visualizingg
