@@ -11,22 +11,22 @@ public class MultiplayerPlayerController : MonoBehaviour
     [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float gravity   = -18f;
 
-
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
-    [SerializeField] private float     groundCheckRadius = 0.2f;
+    [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
-
 
     [Header("Character Setup")]
     [SerializeField] private Transform  characterVisualSlot;
     [SerializeField] private GameObject p1CharacterPrefab;
     [SerializeField] private GameObject p2CharacterPrefab;
 
-
     [Header("Spawn Points")]
     [SerializeField] private Transform p1SpawnPoint;
     [SerializeField] private Transform p2SpawnPoint;
+
+    [Header("Knockback")]
+    [SerializeField] private float knockbackDecay = 10f;   // how fast knockback bleeds off per second
 
     // --- private ---
     private CharacterController cc;
@@ -35,22 +35,23 @@ public class MultiplayerPlayerController : MonoBehaviour
     private float verticalVelocity;
     private bool isGrounded;
     private bool jumpQueued;
+    private Vector3 knockbackVelocity;
 
     // --- public id ---
     public int PlayerID { get; private set; }
 
-       public event Action OnLightAttackEvent;
+    public event Action OnLightAttackEvent;
     public event Action OnHeavyAttackEvent;
     public event Action OnReactionEvent;
 
-    private bool movementEnabled = false;  
+    private bool movementEnabled = false;
     public bool BlockHeld { get; private set; }
 
     // -------------------------------------------------------
 
     private void Awake()
     {
-        cc  = GetComponent<CharacterController>();
+        cc          = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
     }
 
@@ -70,11 +71,21 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (!movementEnabled) return;
         CheckGround();
         ApplyGravity();
-        HandleJump();
-        MoveCharacter();
+
+        if (movementEnabled)
+        {
+            HandleJump();
+            MoveCharacter();
+        }
+        else if (knockbackVelocity != Vector3.zero)
+        {
+            // movement locked but still push via active knockback
+            cc.Move((Vector3.up * verticalVelocity + knockbackVelocity) * Time.deltaTime);
+        }
+
+        ApplyKnockbackDecay();
     }
 
     // -------------------------------------------------------
@@ -94,9 +105,7 @@ public class MultiplayerPlayerController : MonoBehaviour
         cc.enabled = false;
         transform.position = sp.position;
         transform.rotation = sp.rotation;
-        cc.enabled  = true;
-
-       
+        cc.enabled = true;
     }
 
     private void SpawnCharacterVisual()
@@ -104,17 +113,14 @@ public class MultiplayerPlayerController : MonoBehaviour
         GameObject prefab = PlayerID == 1 ? p1CharacterPrefab : p2CharacterPrefab;
 
         if (prefab == null || characterVisualSlot == null)
-        {
-            // Debug.LogWarning($"[P{PlayerID}] character prefab or visual slot not assigned");
             return;
-        }
 
         Instantiate(prefab, characterVisualSlot.position, characterVisualSlot.rotation, characterVisualSlot);
         Debug.Log($"[P{PlayerID}] spawned: {prefab.name}");
     }
 
     // -------------------------------------------------------
-    // input callbacks 
+    // input callbacks
     // -------------------------------------------------------
 
     public void OnMove(InputAction.CallbackContext ctx)
@@ -140,7 +146,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     {
         if (ctx.started)
         {
-            Debug.Log($"[P{PlayerID}] OnHeavyAttack presseed");
+            Debug.Log($"[P{PlayerID}] OnHeavyAttack pressed");
             OnHeavyAttackEvent?.Invoke();
         }
     }
@@ -158,7 +164,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     }
 
     // -------------------------------------------------------
-    // movement — single cc.Move per frame
+    // movement stufff
     // -------------------------------------------------------
 
     private void CheckGround()
@@ -190,10 +196,11 @@ public class MultiplayerPlayerController : MonoBehaviour
         Vector3 horizontal = new Vector3(moveInput.x, 0f, 0f);
         if (horizontal.magnitude > 1f) horizontal.Normalize();
 
-        Vector3 finalMove = horizontal * moveSpeed + Vector3.up * verticalVelocity;
+       
+        Vector3 finalMove = horizontal * moveSpeed + Vector3.up * verticalVelocity + knockbackVelocity;
+
         cc.Move(finalMove * Time.deltaTime);
 
-        
         if (horizontal.x != 0f && characterVisualSlot != null)
         {
             characterVisualSlot.localScale = new Vector3(
@@ -204,20 +211,43 @@ public class MultiplayerPlayerController : MonoBehaviour
         }
     }
 
-    public void SetMovementEnabled(bool enabled)
-{
-    movementEnabled = enabled;
+    // -------------------------------------------------------
+    // knockback
+    // -------------------------------------------------------
 
-    if (!enabled)
+    // called by CombatSystem on the opponent after u  hit
+    public void ApplyKnockback(Vector3 force)
     {
-        moveInput        = Vector2.zero;
-        verticalVelocity = 0f;
-        jumpQueued       = false;
+        knockbackVelocity += force;
+       
     }
-}
+
+    private void ApplyKnockbackDecay()
+    {
+        if (knockbackVelocity == Vector3.zero) return;
+
+        knockbackVelocity = Vector3.MoveTowards(knockbackVelocity, Vector3.zero,
+                                                knockbackDecay * Time.deltaTime);
+    }
 
     // -------------------------------------------------------
-    // gizmos 4 visualizingg
+    // enable / disable
+    // -------------------------------------------------------
+
+    public void SetMovementEnabled(bool enabled)
+    {
+        movementEnabled = enabled;
+
+        if (!enabled)
+        {
+            moveInput        = Vector2.zero;
+            verticalVelocity = 0f;
+            jumpQueued       = false;
+        }
+    }
+
+    // -------------------------------------------------------
+    // gizmos4 visualsss
     // -------------------------------------------------------
 
     private void OnDrawGizmosSelected()

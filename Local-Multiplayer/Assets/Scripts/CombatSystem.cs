@@ -4,7 +4,7 @@ using UnityEngine;
 public class CombatSystem : MonoBehaviour
 {
     [Header("Damage Values")]
-    [SerializeField] private float lightAttackDamage    = 10f;
+    [SerializeField] private float lightAttackDamage  = 10f;
     [SerializeField] private float heavyAttackDamage    = 20f;
     [SerializeField] private float blockDamageReduction = 0.5f;
 
@@ -13,31 +13,39 @@ public class CombatSystem : MonoBehaviour
     [SerializeField] private float heavyAttackCooldown = 0.8f;
 
     [Header("Range")]
-    [SerializeField] private float attackRange = 4.5f;      // generous but requires players to actually be near each other
+    [SerializeField] private float attackRange = 4.5f;
 
+    [Header("Knockback")]
+    [SerializeField] private float lightKnockbackForce  = 4f;
+    [SerializeField] private float heavyKnockbackForce = 8f;
+    [SerializeField] private float knockbackUpAngle= 0.2f;   
+    [SerializeField] private float blockedKnockbackMult = 0.4f; 
+
+    // --- resolved at Start / Update ---
     private PlayerHealth myHealth;
     private PlayerHealth opponentHealth;
     private CombatSystem opponentCombat;
+    private MultiplayerPlayerController opponentController;
     private bool opponentLinked = false;
 
-
+    // --- statez ---
     public  bool IsBlocking   { get; private set; }
     public  bool IsAttacking  { get; private set; }
-    private bool canLight     = true;
-    private bool canHeavy     = true;
+    private bool canLight = true;
+    private bool canHeavy = true;
     private bool combatEnabled = true;
 
     private MultiplayerPlayerController controller;
 
-    
+    // -------------------------------------------------------
 
     private void Awake()
     {
         controller = GetComponent<MultiplayerPlayerController>();
         myHealth   = GetComponent<PlayerHealth>();
 
-        if (controller == null) Debug.LogError($"[CombatSystem] {gameObject.name} — MultiplayerPlayerController missing");
-        if (myHealth   == null) Debug.LogError($"[CombatSystem] {gameObject.name} — PlayerHealth missing");
+        if (controller == null) Debug.LogError($"[CombatSystem] {gameObject.name} — MultiplayerPlayerController noy there");
+        if (myHealth   == null) Debug.LogError($"[CombatSystem] {gameObject.name} — PlayerHealth noy tjere");
     }
 
     private void Start()
@@ -58,7 +66,6 @@ public class CombatSystem : MonoBehaviour
 
     private void Update()
     {
-        // retry opponent link if not found yet
         if (!opponentLinked)
         {
             TryFindOpponent();
@@ -71,7 +78,7 @@ public class CombatSystem : MonoBehaviour
     }
 
     // -------------------------------------------------------
-    // opponent resolution
+    // opponent 
     // -------------------------------------------------------
 
     private void TryFindOpponent()
@@ -82,9 +89,10 @@ public class CombatSystem : MonoBehaviour
         {
             if (other == this) continue;
             opponentHealth = other.GetComponent<PlayerHealth>();
-            opponentCombat = other;
-            opponentLinked = true;
-            Debug.Log($"[P{controller.PlayerID} CombatSystem] opponent linked — ready");
+            opponentCombat  = other;
+            opponentController = other.GetComponent<MultiplayerPlayerController>();
+            opponentLinked  = true;
+            Debug.Log($"[P{controller.PlayerID} CombatSystem] opponent linked... ready");
             break;
         }
     }
@@ -96,69 +104,81 @@ public class CombatSystem : MonoBehaviour
     private void HandleBlock()
     {
         IsBlocking = controller.BlockHeld && !IsAttacking;
-        //will swap for animator.SetBool("IsBlocking", IsBlocking) when animations ready 
-        //@sihawu
     }
 
     // -------------------------------------------------------
-    // attacks — called directly from C# event, not Update
+    // attacks
     // -------------------------------------------------------
 
     private void HandleLightAttack()
     {
         if (!combatEnabled || !opponentLinked) return;
         if (!canLight || IsBlocking) return;
-        StartCoroutine(PerformAttack(lightAttackDamage, lightAttackCooldown, "LIGHT"));
+        StartCoroutine(PerformAttack(lightAttackDamage, lightKnockbackForce, lightAttackCooldown, "LIGHT"));
     }
 
     private void HandleHeavyAttack()
     {
         if (!combatEnabled || !opponentLinked) return;
         if (!canHeavy || IsBlocking) return;
-        StartCoroutine(PerformAttack(heavyAttackDamage, heavyAttackCooldown, "HEAVY"));
+        StartCoroutine(PerformAttack(heavyAttackDamage, heavyKnockbackForce, heavyAttackCooldown, "HEAVY"));
     }
 
-    private IEnumerator PerformAttack(float damage, float cooldown, string type)
+    private IEnumerator PerformAttack(float damage, float knockbackForce, float cooldown, string type)
     {
         IsAttacking = true;
 
         if (type == "LIGHT") canLight = false;
-        else                  canHeavy = false;
+        else                
+        canHeavy = false;
 
-        // swap for animator.SetTrigger("LightAttack") / ("HeavyAttack") when animations ready
         Debug.Log($"[P{controller.PlayerID}] {type} ATTACK");
 
         float dist = Vector3.Distance(transform.position, opponentHealth.transform.position);
 
         if (dist <= attackRange)
         {
-            float final = damage;
+            bool isBlocked = opponentCombat != null && opponentCombat.IsBlocking;
 
-            if (opponentCombat != null && opponentCombat.IsBlocking)
-            {
-                final *= (1f - blockDamageReduction);
-                Debug.Log($"[P{controller.PlayerID}] {type} BLOCKED — reduced to {final}");
-            }
+            float finalDamage    = isBlocked ? damage * (1f - blockDamageReduction) : damage;
+            float finalKnockback = isBlocked ? knockbackForce * blockedKnockbackMult : knockbackForce;
 
-            opponentHealth.TakeDamage(final);
-            Debug.Log($"[P{controller.PlayerID}] {type} hit for {final} — opponent HP: {opponentHealth.CurrentHealth}/{opponentHealth.MaxHealth}");
+            opponentHealth.TakeDamage(finalDamage);
+
+            // knockback direction.... away from attacker, with slight upward angle
+            Vector3 diff = opponentHealth.transform.position - transform.position;
+            diff.y = 0f;
+
+            // fallback to facing direction if players are exactly overlapping
+            Vector3 dir = diff.magnitude > 0.01f
+                ? diff.normalized
+                : (transform.right * (controller.PlayerID == 1 ? 1f : -1f));
+
+            Vector3 knockbackDir = (dir + Vector3.up * knockbackUpAngle).normalized;
+            opponentController?.ApplyKnockback(knockbackDir * finalKnockback);
+
+            if (isBlocked)
+                Debug.Log($"[P{controller.PlayerID}] {type} BLOCKED");
+            else
+                Debug.Log($"[P{controller.PlayerID}] {type} hit");
         }
         else
         {
-            Debug.Log($"[P{controller.PlayerID}] {type} whiffed — dist {dist:F1} > range {attackRange}");
+            Debug.Log($"[P{controller.PlayerID}] {type} ");
         }
 
-        // 0.1s active frames — replace with animation event later
         yield return new WaitForSeconds(0.1f);
         IsAttacking = false;
 
         yield return new WaitForSeconds(cooldown - 0.1f);
 
         if (type == "LIGHT") canLight = true;
-        else                  canHeavy = true;
+        else                
+        canHeavy = true;
     }
 
-    // called by KillerShotManager during reaction window
+    // -------------------------------------------------------
+
     public void SetCombatEnabled(bool enabled)
     {
         combatEnabled = enabled;

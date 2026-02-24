@@ -203,6 +203,7 @@ MonoBehaviour:
   p2CharacterPrefab: {fileID: 2486076501504409559, guid: 34cdfeefbcd59804fa697e6e88b9a298, type: 3}
   p1SpawnPoint: {fileID: 4454348630188849062}
   p2SpawnPoint: {fileID: 7711290544756216165}
+  knockbackDecay: 10
 --- !u!114 &3335410392899374589
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,6 +385,10 @@ MonoBehaviour:
   lightAttackCooldown: 0.4
   heavyAttackCooldown: 0.8
   attackRange: 2
+  lightKnockbackForce: 1
+  heavyKnockbackForce: 2
+  knockbackUpAngle: 0.2
+  blockedKnockbackMult: 0.4
 --- !u!1 &3178662676928722422
 GameObject:
   m_ObjectHideFlags: 0
