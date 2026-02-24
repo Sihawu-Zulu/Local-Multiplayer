@@ -628,6 +628,9 @@ MonoBehaviour:
   OnPerfectPress:
     m_PersistentCalls:
       m_Calls: []
+  OnTooLate:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &277316811
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1077,6 +1080,7 @@ RectTransform:
   - {fileID: 386311147}
   - {fileID: 1375217723}
   - {fileID: 1986722718}
+  - {fileID: 1800493857}
   m_Father: {fileID: 1775771870}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -1820,7 +1824,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -133.26648, w: -73.97659}
+  m_margin: {x: -114.71777, y: 0, z: -235.57983, w: -73.97659}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1901,8 +1905,8 @@ MonoBehaviour:
   countdownRoot: {fileID: 1865718025}
   countdownText: {fileID: 1246126712}
   colourReady: {r: 1, g: 1, b: 1, a: 1}
-  colourNumber: {r: 1, g: 0.85, b: 0.1, a: 1}
-  colourFight: {r: 0.2, g: 1, b: 0.4, a: 1}
+  colourNumber: {r: 1, g: 1, b: 1, a: 1}
+  colourFight: {r: 0.6528301, g: 0.05296541, b: 0.06636943, a: 1}
   punchScale: 1.4
   punchDuration: 0.12
   shrinkDuration: 0.18
@@ -3141,7 +3145,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 743093535}
-  - {fileID: 1800493857}
   m_Father: {fileID: 1880455354}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -3210,7 +3213,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1800493856}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3219,7 +3222,7 @@ RectTransform:
   - {fileID: 870793186}
   - {fileID: 1584954317}
   - {fileID: 948095332}
-  m_Father: {fileID: 1775771870}
+  m_Father: {fileID: 743093535}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -3241,6 +3244,9 @@ MonoBehaviour:
   promptRoot: {fileID: 1800493856}
   promptText: {fileID: 870793187}
   promptBackground: {fileID: 1161186102}
+  p1PromptLabel: Player 1 - REACT!
+  p2PromptLabel: Player 2 - REACT!
+  bothPromptLabel: REACT!
   pulseMinScale: 0.92
   pulseMaxScale: 1.08
   pulseSpeedBase: 1.5
@@ -3249,7 +3255,15 @@ MonoBehaviour:
   promptColorUrgent: {r: 1, g: 0.2, b: 0.1, a: 1}
   p1FeedbackText: {fileID: 1584954318}
   p2FeedbackText: {fileID: 948095333}
+  earlyPrefix: TOO EARLY!
+  latePrefix: TOO LATE!
+  perfectPrefix: PERFECT!
+  showPlayerName: 0
   feedbackDuration: 1.2
+  feedbackFadeTime: 0.3
+  colourEarly: {r: 1, g: 0, b: 0, a: 1}
+  colourLate: {r: 1, g: 0.5, b: 0, a: 1}
+  colourPerfect: {r: 0.2, g: 1, b: 0.4, a: 1}
   killerShotManager: {fileID: 277316810}
 --- !u!1 &1865718025
 GameObject:

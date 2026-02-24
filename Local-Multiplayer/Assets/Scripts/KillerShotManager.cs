@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+
 // finds both players via FindObjectsByType — retries every frame until both are found
 // reaction input uses C# event subscription — no frame flag timing issues cos that was a bitchhhhh
 
@@ -15,14 +16,15 @@ public class KillerShotManager : MonoBehaviour
     [SerializeField] private float hapticHighFreq      = 0.8f;
 
     // --- events ---
-    public UnityEvent  OnKillerShotPhaseStarted;
+    public UnityEvent<int>   OnKillerShotPhaseStarted;  // int = playerID who triggered it
     public UnityEvent        OnKillerShotPhaseEnded;
     public UnityEvent<int>   OnKillerShotWinner;
     public UnityEvent        OnKillerShotExpired;
     public UnityEvent<int>   OnEarlyPress;
     public UnityEvent<int>   OnPerfectPress;
+    public UnityEvent<int>   OnTooLate; // int = playerID who didn't react in time
 
-    // --- resolved once both players are found ---
+  
     private PlayerHealth p1Health;
     private PlayerHealth p2Health;
     private MultiplayerPlayerController p1Controller;
@@ -32,23 +34,25 @@ public class KillerShotManager : MonoBehaviour
     private bool playersResolved = false;
 
     // --- state ---
-    private bool killerShotActive = false;
-    private bool reactionWindowOpen = false;
+    private bool killerShotActive    = false;
+    private bool reactionWindowOpen  = false;
     private float reactionWindowDuration;
     private float windowTimer;
     private Coroutine reactionCoroutine;
-    private bool p1PressedEarly     = false;
-    private bool p2PressedEarly     = false;
-
-  
-    private bool p1ReactionPressed = false;
+    private bool p1PressedEarly = false;
+    private bool p2PressedEarly = false;
+    private bool p1ReactionPressed  = false;
     private bool p2ReactionPressed = false;
+    private int  triggeringPlayerID= 0;   // which player's health dropped low
+    private bool p1ReactedInWindow = false;  // did they press during the open window
+    private bool p2ReactedInWindow  = false;
 
     private Gamepad p1Gamepad;
     private Gamepad p2Gamepad;
 
     public float GetWindowTimeRemaining() => windowTimer;
     public float GetWindowDuration()      => reactionWindowDuration;
+    public int   GetTriggeringPlayerID()  => triggeringPlayerID;
 
     // -------------------------------------------------------
 
@@ -62,7 +66,6 @@ public class KillerShotManager : MonoBehaviour
 
         if (!killerShotActive) return;
 
-   
         bool p1Pressed = p1ReactionPressed;
         bool p2Pressed = p2ReactionPressed;
         p1ReactionPressed = false;
@@ -78,17 +81,18 @@ public class KillerShotManager : MonoBehaviour
         bool p1Valid = p1Pressed && !p1PressedEarly;
         bool p2Valid = p2Pressed && !p2PressedEarly;
 
+        if (p1Valid) p1ReactedInWindow = true;
+        if (p2Valid) p2ReactedInWindow = true;
+
         if      (p1Valid && p2Valid) ResolveKillerShot(1);
         else if (p1Valid)          { CheckPerfect(1); ResolveKillerShot(1); }
         else if (p2Valid)          { CheckPerfect(2); ResolveKillerShot(2); }
     }
 
-  
-
     private void OnP1Reaction() => p1ReactionPressed = true;
     private void OnP2Reaction() => p2ReactionPressed = true;
 
-
+    // -------------------------------------------------------
 
     private void TryResolvePlayerReferences()
     {
@@ -105,56 +109,55 @@ public class KillerShotManager : MonoBehaviour
 
         if (p1Controller == null || p2Controller == null) return;
 
-     
-        p1Health.OnKillerShotTriggered.AddListener(ActivateKillerShotPhase);
-        p2Health.OnKillerShotTriggered.AddListener(ActivateKillerShotPhase);
+        // pass playerID into the listener so we know who triggered the phase
+        p1Health.OnKillerShotTriggered.AddListener(() => ActivateKillerShotPhase(1));
+        p2Health.OnKillerShotTriggered.AddListener(() => ActivateKillerShotPhase(2));
 
         p1Controller.OnReactionEvent += OnP1Reaction;
         p2Controller.OnReactionEvent += OnP2Reaction;
 
         playersResolved = true;
         RefreshGamepads();
-
- 
     }
 
     private void OnDestroy()
     {
-        // unsubscribe to avoid memory leaks WHY DID I NOT THINK OF THIS BEFORE IT WAS LITERALLY A PROBLEM FOR 3 DAYSSSS
         if (p1Controller != null) p1Controller.OnReactionEvent -= OnP1Reaction;
         if (p2Controller != null) p2Controller.OnReactionEvent -= OnP2Reaction;
 
         StopHaptics();
     }
 
+    // -------------------------------------------------------
 
-
-    private void ActivateKillerShotPhase()
+    private void ActivateKillerShotPhase(int playerID)
     {
         if (killerShotActive) return;
 
-        killerShotActive = true;
+        killerShotActive  = true;
         reactionWindowOpen = false;
-        p1PressedEarly = false;
+        triggeringPlayerID = playerID;
+        p1PressedEarly  = false;
         p2PressedEarly = false;
         p1ReactionPressed = false;
-        p2ReactionPressed = false;
+        p2ReactionPressed  = false;
+        p1ReactedInWindow = false;
+        p2ReactedInWindow  = false;
         reactionWindowDuration = Random.Range(minReactionWindow, maxReactionWindow);
         windowTimer = reactionWindowDuration;
 
         p1Combat?.SetCombatEnabled(false);
         p2Combat?.SetCombatEnabled(false);
 
-        OnKillerShotPhaseStarted?.Invoke();
+        OnKillerShotPhaseStarted?.Invoke(playerID);
         StartHaptics();
 
         reactionCoroutine = StartCoroutine(ReactionWindowRoutine());
-     
     }
 
     private IEnumerator ReactionWindowRoutine()
     {
-        yield return new WaitForSeconds(0.5f);      // brief delay — punishes immediate pressers
+        yield return new WaitForSeconds(0.5f);  // brief delay — punishes immediate pressers
 
         reactionWindowOpen = true;
         Debug.Log("[KillerShot] window OPEN");
@@ -162,8 +165,8 @@ public class KillerShotManager : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < reactionWindowDuration && killerShotActive)
         {
-            elapsed += Time.deltaTime;
-            windowTimer  = reactionWindowDuration - elapsed;
+            elapsed    += Time.deltaTime;
+            windowTimer = reactionWindowDuration - elapsed;
             yield return null;
         }
 
@@ -173,9 +176,13 @@ public class KillerShotManager : MonoBehaviour
             reactionWindowOpen = false;
             StopHaptics();
             ReenableCombat();
+
+            // fire OnTooLate for every player who didn't react during the window
+            if (!p1ReactedInWindow && !p1PressedEarly) OnTooLate?.Invoke(1);
+            if (!p2ReactedInWindow && !p2PressedEarly) OnTooLate?.Invoke(2);
             OnKillerShotExpired?.Invoke();
             OnKillerShotPhaseEnded?.Invoke();
-            Debug.Log("[KillerShot] expired... nobody reacted");
+            Debug.Log("[KillerShot] expired — window closed");
         }
     }
 
@@ -199,7 +206,8 @@ public class KillerShotManager : MonoBehaviour
         if (reactionCoroutine != null) StopCoroutine(reactionCoroutine);
 
         if (winnerID == 1) p2Health?.TakeKillerShotDamage();
-        else               p1Health?.TakeKillerShotDamage();
+        else              
+         p1Health?.TakeKillerShotDamage();
 
         ReenableCombat();
         OnKillerShotWinner?.Invoke(winnerID);
@@ -218,6 +226,7 @@ public class KillerShotManager : MonoBehaviour
     {
         killerShotActive   = false;
         reactionWindowOpen = false;
+        triggeringPlayerID = 0;
         StopHaptics();
         ReenableCombat();
 
