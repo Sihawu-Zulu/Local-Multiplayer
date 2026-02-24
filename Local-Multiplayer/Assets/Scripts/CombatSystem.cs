@@ -1,14 +1,11 @@
 using System.Collections;
 using UnityEngine;
 
-// subscribes to controller's C# events directly — no frame flag timing issues
-// bypassRangeCheck = true so attacks always land until animations/hitboxes are ready by @sihawu & @jaiden
-
 public class CombatSystem : MonoBehaviour
 {
     [Header("Damage Values")]
-    [SerializeField] private float lightAttackDamage = 10f;
-    [SerializeField] private float heavyAttackDamage  = 20f;
+    [SerializeField] private float lightAttackDamage    = 10f;
+    [SerializeField] private float heavyAttackDamage    = 20f;
     [SerializeField] private float blockDamageReduction = 0.5f;
 
     [Header("Cooldowns")]
@@ -16,16 +13,14 @@ public class CombatSystem : MonoBehaviour
     [SerializeField] private float heavyAttackCooldown = 0.8f;
 
     [Header("Range")]
-    [SerializeField] private float attackRange      = 2.5f;
-    [SerializeField] private bool  bypassRangeCheck = true;   
-
+    [SerializeField] private float attackRange = 4.5f;      // generous but requires players to actually be near each other
 
     private PlayerHealth myHealth;
     private PlayerHealth opponentHealth;
     private CombatSystem opponentCombat;
     private bool opponentLinked = false;
 
-    // --- state ---
+
     public  bool IsBlocking   { get; private set; }
     public  bool IsAttacking  { get; private set; }
     private bool canLight     = true;
@@ -34,7 +29,7 @@ public class CombatSystem : MonoBehaviour
 
     private MultiplayerPlayerController controller;
 
-    // -------------------------------------------------------
+    
 
     private void Awake()
     {
@@ -47,16 +42,13 @@ public class CombatSystem : MonoBehaviour
 
     private void Start()
     {
-    
         controller.OnLightAttackEvent += HandleLightAttack;
         controller.OnHeavyAttackEvent += HandleHeavyAttack;
-
         TryFindOpponent();
     }
 
     private void OnDestroy()
     {
-        // always unsubscribe to avoid memory leaks lolll
         if (controller != null)
         {
             controller.OnLightAttackEvent -= HandleLightAttack;
@@ -66,7 +58,7 @@ public class CombatSystem : MonoBehaviour
 
     private void Update()
     {
-        // retry opponent link if not found yet — this allows for flexible scene setup and ensures we don't miss the link if one player spawns slightly after the other for any reason
+        // retry opponent link if not found yet
         if (!opponentLinked)
         {
             TryFindOpponent();
@@ -89,27 +81,23 @@ public class CombatSystem : MonoBehaviour
         foreach (var other in allCombat)
         {
             if (other == this) continue;
-
             opponentHealth = other.GetComponent<PlayerHealth>();
             opponentCombat = other;
             opponentLinked = true;
-
-           
+            Debug.Log($"[P{controller.PlayerID} CombatSystem] opponent linked — ready");
             break;
         }
     }
 
     // -------------------------------------------------------
-    // block — still checked in Update since it's a held state
+    // block
     // -------------------------------------------------------
 
     private void HandleBlock()
     {
         IsBlocking = controller.BlockHeld && !IsAttacking;
-
-        // will put for animator.SetBool("IsBlocking", IsBlocking) 
-        if (IsBlocking)
-            Debug.Log($"[P{controller.PlayerID}] BLOCKING");
+        //will swap for animator.SetBool("IsBlocking", IsBlocking) when animations ready 
+        //@sihawu
     }
 
     // -------------------------------------------------------
@@ -137,31 +125,30 @@ public class CombatSystem : MonoBehaviour
         if (type == "LIGHT") canLight = false;
         else                  canHeavy = false;
 
-        // will use for animator.SetTrigger("LightAttack") / ("HeavyAttack") 
+        // swap for animator.SetTrigger("LightAttack") / ("HeavyAttack") when animations ready
         Debug.Log($"[P{controller.PlayerID}] {type} ATTACK");
 
-        bool inRange = bypassRangeCheck || IsInRange();
+        float dist = Vector3.Distance(transform.position, opponentHealth.transform.position);
 
-        if (inRange)
+        if (dist <= attackRange)
         {
             float final = damage;
 
             if (opponentCombat != null && opponentCombat.IsBlocking)
             {
                 final *= (1f - blockDamageReduction);
-              
+                Debug.Log($"[P{controller.PlayerID}] {type} BLOCKED — reduced to {final}");
             }
 
             opponentHealth.TakeDamage(final);
-            // Debug.Log($"[P{controller.PlayerID}] {type} dealt {final} — opponent HP: {opponentHealth.CurrentHealth}/{opponentHealth.MaxHealth}");
+            Debug.Log($"[P{controller.PlayerID}] {type} hit for {final} — opponent HP: {opponentHealth.CurrentHealth}/{opponentHealth.MaxHealth}");
         }
         else
         {
-            float dist = Vector3.Distance(transform.position, opponentHealth.transform.position);
-           
+            Debug.Log($"[P{controller.PlayerID}] {type} whiffed — dist {dist:F1} > range {attackRange}");
         }
 
-        // 0.1s active frames placeholder — replace with animation event later
+        // 0.1s active frames — replace with animation event later
         yield return new WaitForSeconds(0.1f);
         IsAttacking = false;
 
@@ -169,16 +156,6 @@ public class CombatSystem : MonoBehaviour
 
         if (type == "LIGHT") canLight = true;
         else                  canHeavy = true;
-    }
-
-    // -------------------------------------------------------
-    // helpers
-    // -------------------------------------------------------
-
-    private bool IsInRange()
-    {
-        if (opponentHealth == null) return false;
-        return Vector3.Distance(transform.position, opponentHealth.transform.position) <= attackRange;
     }
 
     // called by KillerShotManager during reaction window
@@ -191,17 +168,11 @@ public class CombatSystem : MonoBehaviour
             IsBlocking  = false;
             IsAttacking = false;
         }
-
-        // Debug.Log($"[P{controller.PlayerID}] combat {(enabled ? "ENABLED" : "DISABLED")}");
     }
 
     private void OnDrawGizmosSelected()
     {
-         Gizmos.color = Color.purple;
-Vector3 pos = transform.position + Vector3.down * 0.9f;
-
-    Gizmos.DrawWireSphere(pos, attackRange);
-
-
+        Gizmos.color = Color.purple;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
