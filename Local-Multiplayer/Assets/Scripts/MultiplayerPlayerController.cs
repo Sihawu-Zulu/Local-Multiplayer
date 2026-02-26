@@ -26,7 +26,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     [SerializeField] private Transform p2SpawnPoint;
 
     [Header("Knockback")]
-    [SerializeField] private float knockbackDecay = 10f;   // how fast knockback bleeds off per second
+    [SerializeField] private float knockbackDecay = 10f;
 
     // --- private ---
     private CharacterController cc;
@@ -43,6 +43,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     public event Action OnLightAttackEvent;
     public event Action OnHeavyAttackEvent;
     public event Action OnReactionEvent;
+    public event Action OnGetUpEvent;       
 
     private bool movementEnabled = false;
     public bool BlockHeld { get; private set; }
@@ -81,7 +82,6 @@ public class MultiplayerPlayerController : MonoBehaviour
         }
         else if (knockbackVelocity != Vector3.zero)
         {
-            // movement locked but still push via active knockback
             cc.Move((Vector3.up * verticalVelocity + knockbackVelocity) * Time.deltaTime);
         }
 
@@ -163,8 +163,18 @@ public class MultiplayerPlayerController : MonoBehaviour
             OnReactionEvent?.Invoke();
     }
 
+    // north button — mash while downed to get back up
+    public void OnGetUp(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started)
+            OnGetUpEvent?.Invoke();
+    }
+
+    // lets knockdownmanager grab the visual slot to rotate/tumble it
+    public Transform GetVisualSlot() => characterVisualSlot;
+
     // -------------------------------------------------------
-    // movement stufff
+    // movement
     // -------------------------------------------------------
 
     private void CheckGround()
@@ -196,9 +206,7 @@ public class MultiplayerPlayerController : MonoBehaviour
         Vector3 horizontal = new Vector3(moveInput.x, 0f, 0f);
         if (horizontal.magnitude > 1f) horizontal.Normalize();
 
-       
         Vector3 finalMove = horizontal * moveSpeed + Vector3.up * verticalVelocity + knockbackVelocity;
-
         cc.Move(finalMove * Time.deltaTime);
 
         if (horizontal.x != 0f && characterVisualSlot != null)
@@ -215,11 +223,9 @@ public class MultiplayerPlayerController : MonoBehaviour
     // knockback
     // -------------------------------------------------------
 
-    // called by CombatSystem on the opponent after u  hit
     public void ApplyKnockback(Vector3 force)
     {
         knockbackVelocity += force;
-       
     }
 
     private void ApplyKnockbackDecay()
@@ -247,7 +253,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     }
 
     // -------------------------------------------------------
-    // gizmos4 visualsss
+    // gizmos
     // -------------------------------------------------------
 
     private void OnDrawGizmosSelected()

@@ -199,8 +199,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   characterVisualSlot: {fileID: 5538308211578461374}
-  p1CharacterPrefab: {fileID: 1918950375905787413, guid: 386c4f181fc038546b2b1187b4200972, type: 3}
-  p2CharacterPrefab: {fileID: 2486076501504409559, guid: 34cdfeefbcd59804fa697e6e88b9a298, type: 3}
+  p1CharacterPrefab: {fileID: 7181846524182873350, guid: fbed27f62ff683640a8c6312024a3022, type: 3}
+  p2CharacterPrefab: {fileID: 7365780596749047581, guid: 4c3cff7f6d54ce445aa1afe17cb48f6d, type: 3}
   p1SpawnPoint: {fileID: 4454348630188849062}
   p2SpawnPoint: {fileID: 7711290544756216165}
   knockbackDecay: 10
@@ -325,6 +325,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: d5430c72-84f9-4a97-8fea-b1c90dac2f90
     m_ActionName: 'PlayerControls/Block[/XInputControllerWindows/leftTrigger,/DualShock4GamepadHID/leftTrigger]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3532998573399416451}
+        m_TargetAssemblyTypeName: MultiplayerPlayerController, Assembly-CSharp
+        m_MethodName: OnGetUp
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 25daa40d-d563-41ef-ab8d-7f38e787644c
+    m_ActionName: 'PlayerControls/GetUp[/DualShock4GamepadHID/buttonNorth]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: PlayerControls
@@ -385,8 +401,8 @@ MonoBehaviour:
   lightAttackCooldown: 0.4
   heavyAttackCooldown: 0.8
   attackRange: 2
-  lightKnockbackForce: 1
-  heavyKnockbackForce: 2
+  lightKnockbackForce: 4
+  heavyKnockbackForce: 6
   knockbackUpAngle: 0.2
   blockedKnockbackMult: 0.4
 --- !u!1 &3178662676928722422
@@ -509,7 +525,7 @@ Transform:
   m_GameObject: {fileID: 9101388441028079234}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.32631, y: 1.2135799, z: 0}
+  m_LocalPosition: {x: 7.3832493, y: 0.86358, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

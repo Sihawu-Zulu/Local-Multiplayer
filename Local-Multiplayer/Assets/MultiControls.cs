@@ -145,6 +145,15 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": ""Hold"",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""GetUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""25daa40d-d563-41ef-ab8d-7f38e787644c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -312,6 +321,17 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
                     ""action"": ""Block"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d8c0d5cc-46ce-480b-9410-6fb36b488736"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GetUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -326,6 +346,7 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
         m_PlayerControls_LightAttack = m_PlayerControls.FindAction("LightAttack", throwIfNotFound: true);
         m_PlayerControls_ReactionTrigger = m_PlayerControls.FindAction("ReactionTrigger", throwIfNotFound: true);
         m_PlayerControls_Block = m_PlayerControls.FindAction("Block", throwIfNotFound: true);
+        m_PlayerControls_GetUp = m_PlayerControls.FindAction("GetUp", throwIfNotFound: true);
     }
 
     ~@MultiControls()
@@ -412,6 +433,7 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerControls_LightAttack;
     private readonly InputAction m_PlayerControls_ReactionTrigger;
     private readonly InputAction m_PlayerControls_Block;
+    private readonly InputAction m_PlayerControls_GetUp;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerControls".
     /// </summary>
@@ -447,6 +469,10 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "PlayerControls/Block".
         /// </summary>
         public InputAction @Block => m_Wrapper.m_PlayerControls_Block;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerControls/GetUp".
+        /// </summary>
+        public InputAction @GetUp => m_Wrapper.m_PlayerControls_GetUp;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -491,6 +517,9 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
             @Block.started += instance.OnBlock;
             @Block.performed += instance.OnBlock;
             @Block.canceled += instance.OnBlock;
+            @GetUp.started += instance.OnGetUp;
+            @GetUp.performed += instance.OnGetUp;
+            @GetUp.canceled += instance.OnGetUp;
         }
 
         /// <summary>
@@ -520,6 +549,9 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
             @Block.started -= instance.OnBlock;
             @Block.performed -= instance.OnBlock;
             @Block.canceled -= instance.OnBlock;
+            @GetUp.started -= instance.OnGetUp;
+            @GetUp.performed -= instance.OnGetUp;
+            @GetUp.canceled -= instance.OnGetUp;
         }
 
         /// <summary>
@@ -602,5 +634,12 @@ public partial class @MultiControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnBlock(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "GetUp" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnGetUp(InputAction.CallbackContext context);
     }
 }
