@@ -11,8 +11,8 @@ public class KillerShotPromptUI : MonoBehaviour
     [SerializeField] private Image            promptBackground;
 
     [Header("Prompt Text")]
-    [SerializeField] private string p1PromptLabel = "Player 1 — REACT!";
-    [SerializeField] private string p2PromptLabel = "Player 2 — REACT!";
+    [SerializeField] private string p1PromptLabel = "Player 1 - REACT!";
+    [SerializeField] private string p2PromptLabel = "Player 2 - REACT!";
     [SerializeField] private string bothPromptLabel = "REACT!";
 
     [Header("Pulse Settings")]

@@ -2,13 +2,16 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
-// tracks best-of-3 rounds — retries finding players every frame until both are found
-// only subscribes to health events once both players have properr PlayerIDs
+// NEEEED to change it so that trigger prompt doesnt just end the round immediately — need to wait to finish and the damage to apply before ending the round
+//rn it just calls killerShotManager.EndKillerShot() which ends the phase and applies damage, but the round manager is subscribed to the OnKillerShotWinner event so it ends the round immediately when that event fires — need to add a delay or something so that the killer shot phase can finish properly before the round ends
+//
 
 public class RoundManager : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private KillerShotManager killerShotManager;
+    [SerializeField] public KnockdownManager knockdownManager;
+
 
     [Header("Round Settings")]
     [SerializeField] private int   roundsToWin     = 2;
@@ -141,6 +144,7 @@ public class RoundManager : MonoBehaviour
         yield return new WaitForSeconds(roundEndDelay);
 
         killerShotManager.ResetKillerShot();
+        knockdownManager?.ResetKnockdown();
         p1Health?.ResetHealth();
         p2Health?.ResetHealth();
 

@@ -4,7 +4,7 @@ using UnityEngine;
 public class CombatSystem : MonoBehaviour
 {
     [Header("Damage Values")]
-    [SerializeField] private float lightAttackDamage  = 10f;
+    [SerializeField] private float lightAttackDamage    = 10f;
     [SerializeField] private float heavyAttackDamage    = 20f;
     [SerializeField] private float blockDamageReduction = 0.5f;
 
@@ -17,23 +17,24 @@ public class CombatSystem : MonoBehaviour
 
     [Header("Knockback")]
     [SerializeField] private float lightKnockbackForce  = 4f;
-    [SerializeField] private float heavyKnockbackForce = 8f;
-    [SerializeField] private float knockbackUpAngle= 0.2f;   
-    [SerializeField] private float blockedKnockbackMult = 0.4f; 
+    [SerializeField] private float heavyKnockbackForce  = 8f;
+    [SerializeField] private float knockbackUpAngle     = 0.2f;
+    [SerializeField] private float blockedKnockbackMult = 0.4f;
 
-    // --- resolved at Start / Update ---
+    // --- resolved at start / update ---
     private PlayerHealth myHealth;
     private PlayerHealth opponentHealth;
     private CombatSystem opponentCombat;
     private MultiplayerPlayerController opponentController;
     private bool opponentLinked = false;
 
-    // --- statez ---
-    public  bool IsBlocking   { get; private set; }
-    public  bool IsAttacking  { get; private set; }
-    private bool canLight = true;
-    private bool canHeavy = true;
+    // --- state ---
+    public  bool IsBlocking  { get; private set; }
+    public  bool IsAttacking { get; private set; }
+    private bool canLight      = true;
+    private bool canHeavy      = true;
     private bool combatEnabled = true;
+    private bool heavyEnabled  = true;   // flipped false when arm detaches — stays off for the round
 
     private MultiplayerPlayerController controller;
 
@@ -44,8 +45,8 @@ public class CombatSystem : MonoBehaviour
         controller = GetComponent<MultiplayerPlayerController>();
         myHealth   = GetComponent<PlayerHealth>();
 
-        if (controller == null) Debug.LogError($"[CombatSystem] {gameObject.name} — MultiplayerPlayerController noy there");
-        if (myHealth   == null) Debug.LogError($"[CombatSystem] {gameObject.name} — PlayerHealth noy tjere");
+        if (controller == null) Debug.LogError($"[CombatSystem] {gameObject.name} — no controller");
+        if (myHealth   == null) Debug.LogError($"[CombatSystem] {gameObject.name} — no health");
     }
 
     private void Start()
@@ -78,7 +79,7 @@ public class CombatSystem : MonoBehaviour
     }
 
     // -------------------------------------------------------
-    // opponent 
+    // opponent link
     // -------------------------------------------------------
 
     private void TryFindOpponent()
@@ -88,11 +89,11 @@ public class CombatSystem : MonoBehaviour
         foreach (var other in allCombat)
         {
             if (other == this) continue;
-            opponentHealth = other.GetComponent<PlayerHealth>();
-            opponentCombat  = other;
+            opponentHealth     = other.GetComponent<PlayerHealth>();
+            opponentCombat     = other;
             opponentController = other.GetComponent<MultiplayerPlayerController>();
-            opponentLinked  = true;
-            Debug.Log($"[P{controller.PlayerID} CombatSystem] opponent linked... ready");
+            opponentLinked     = true;
+            Debug.Log($"[P{controller.PlayerID} CombatSystem] opponent linked");
             break;
         }
     }
@@ -120,7 +121,7 @@ public class CombatSystem : MonoBehaviour
     private void HandleHeavyAttack()
     {
         if (!combatEnabled || !opponentLinked) return;
-        if (!canHeavy || IsBlocking) return;
+        if (!canHeavy || IsBlocking || !heavyEnabled) return;   // arm gone = no heavy
         StartCoroutine(PerformAttack(heavyAttackDamage, heavyKnockbackForce, heavyAttackCooldown, "HEAVY"));
     }
 
@@ -129,8 +130,7 @@ public class CombatSystem : MonoBehaviour
         IsAttacking = true;
 
         if (type == "LIGHT") canLight = false;
-        else                
-        canHeavy = false;
+        else                 canHeavy = false;
 
         Debug.Log($"[P{controller.PlayerID}] {type} ATTACK");
 
@@ -145,11 +145,9 @@ public class CombatSystem : MonoBehaviour
 
             opponentHealth.TakeDamage(finalDamage);
 
-            // knockback direction.... away from attacker, with slight upward angle
             Vector3 diff = opponentHealth.transform.position - transform.position;
             diff.y = 0f;
 
-            // fallback to facing direction if players are exactly overlapping
             Vector3 dir = diff.magnitude > 0.01f
                 ? diff.normalized
                 : (transform.right * (controller.PlayerID == 1 ? 1f : -1f));
@@ -157,14 +155,12 @@ public class CombatSystem : MonoBehaviour
             Vector3 knockbackDir = (dir + Vector3.up * knockbackUpAngle).normalized;
             opponentController?.ApplyKnockback(knockbackDir * finalKnockback);
 
-            if (isBlocked)
-                Debug.Log($"[P{controller.PlayerID}] {type} BLOCKED");
-            else
-                Debug.Log($"[P{controller.PlayerID}] {type} hit");
+            if (isBlocked) Debug.Log($"[P{controller.PlayerID}] {type} BLOCKED");
+            else           Debug.Log($"[P{controller.PlayerID}] {type} hit");
         }
         else
         {
-            Debug.Log($"[P{controller.PlayerID}] {type} ");
+            Debug.Log($"[P{controller.PlayerID}] {type} miss");
         }
 
         yield return new WaitForSeconds(0.1f);
@@ -173,10 +169,11 @@ public class CombatSystem : MonoBehaviour
         yield return new WaitForSeconds(cooldown - 0.1f);
 
         if (type == "LIGHT") canLight = true;
-        else                
-        canHeavy = true;
+        else                 canHeavy = true;
     }
 
+    // -------------------------------------------------------
+    // enable / disable
     // -------------------------------------------------------
 
     public void SetCombatEnabled(bool enabled)
@@ -189,6 +186,16 @@ public class CombatSystem : MonoBehaviour
             IsAttacking = false;
         }
     }
+
+    // arm detached — heavy stays off for the rest of the round
+    public void SetHeavyAttackEnabled(bool enabled)
+    {
+        heavyEnabled = enabled;
+        if (!enabled)
+            Debug.Log($"[P{controller.PlayerID} CombatSystem] heavy attack disabled — arm is gone");
+    }
+
+    // -------------------------------------------------------
 
     private void OnDrawGizmosSelected()
     {
