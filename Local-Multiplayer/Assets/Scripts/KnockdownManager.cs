@@ -2,9 +2,10 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
-// winner pushes the loser ... they fly back and fall flat 
+// drives the voodoo doll knockdown phase after a killer shot connects
+// winner pushes the loser — they fly back and fall flat (visual slot rotates 90 on z)
 // downed player mashes GetUp (north button) — each press does a little random roll/tumble
-// attacker holds Block/Left Trigger to pull the string and slowly detach the arm.... think its better 2 reuse idk we can change gents
+// attacker holds Block/Left Trigger to pull the string and slowly detach the arm
 // if arm fully detaches — downed player loses heavy attack permanently for the round
 
 public class KnockdownManager : MonoBehaviour
@@ -22,18 +23,18 @@ public class KnockdownManager : MonoBehaviour
     [SerializeField] private Vector3 armDetachedOffset = new Vector3(0.5f, -0.3f, 0f);
 
     [Header("Knockback / Fall Settings")]
-    [SerializeField] private float knockbackForce    = 8f;   // how hard the loser gets pushed on knockdown
-    [SerializeField] private float fallRotateDuration = 0.25f; //
-    [SerializeField] private float fallRotateAngle   = 90f;   
+    [SerializeField] private float knockbackForce    = 12f;   // how hard the loser gets pushed on knockdown
+    [SerializeField] private float fallRotateDuration = 0.25f; // how long it takes to rotate flat
+    [SerializeField] private float fallRotateAngle   = 90f;   // z rotation when flat on the floor
 
     [Header("Roll / Tumble Settings")]
     [SerializeField] private float rollDuration      = 0.18f;  // how long each roll takes
-    [SerializeField] private float rollAngle         = 180f;   // full spin per mash
+    [SerializeField] private float rollAngle         = 360f;   // full spin per mash
     [SerializeField] private float rollMoveDistance  = 0.4f;   // how far they slide per roll
 
-   
-    private Transform  p1ArmTransform;
-    private Transform  p2ArmTransform;
+    // --- runtime resolved ---
+    private Transform      p1ArmTransform;
+    private Transform      p2ArmTransform;
     private ParticleSystem p1StringTrail;
     private ParticleSystem p2StringTrail;
 
@@ -51,6 +52,8 @@ public class KnockdownManager : MonoBehaviour
     private PlayerHealth p2Health;
     private CombatSystem p1Combat;
     private CombatSystem p2Combat;
+    private VoodooPhysicsLayer p1Physics;
+    private VoodooPhysicsLayer p2Physics;
     private bool playersResolved = false;
 
     // --- state ---
@@ -98,8 +101,8 @@ public class KnockdownManager : MonoBehaviour
 
         foreach (var c in controllers)
         {
-            if (c.PlayerID == 1) { p1Controller = c; p1Health = c.GetComponent<PlayerHealth>(); p1Combat = c.GetComponent<CombatSystem>(); }
-            if (c.PlayerID == 2) { p2Controller = c; p2Health = c.GetComponent<PlayerHealth>(); p2Combat = c.GetComponent<CombatSystem>(); }
+            if (c.PlayerID == 1) { p1Controller = c; p1Health = c.GetComponent<PlayerHealth>(); p1Combat = c.GetComponent<CombatSystem>(); p1Physics = c.GetComponent<VoodooPhysicsLayer>(); }
+            if (c.PlayerID == 2) { p2Controller = c; p2Health = c.GetComponent<PlayerHealth>(); p2Combat = c.GetComponent<CombatSystem>(); p2Physics = c.GetComponent<VoodooPhysicsLayer>(); }
         }
 
         if (p1Controller == null || p2Controller == null) return;
@@ -143,13 +146,14 @@ public class KnockdownManager : MonoBehaviour
 
         GetController(downedPlayerID)?.SetMovementEnabled(false);
         GetCombat(downedPlayerID)?.SetCombatEnabled(false);
+        GetPhysics(downedPlayerID)?.SetPhysicsEnabled(false);   // pause ragdoll layer while on the floor
 
         // push the downed player away from the attacker then tip them flat
         ApplyKnockdownKnockback(downedID);
         StartCoroutine(FallFlat(downedID));
 
         OnKnockdownStarted?.Invoke(downedID);
-     
+        Debug.Log($"[Knockdown] P{downedID} is downed — mash to get up!");
     }
 
     // -------------------------------------------------------
@@ -312,6 +316,7 @@ public class KnockdownManager : MonoBehaviour
         {
             GetController(downedPlayerID)?.SetMovementEnabled(true);
             GetCombat(downedPlayerID)?.SetCombatEnabled(true);
+            GetPhysics(downedPlayerID)?.SetPhysicsEnabled(true);
             SnapArmBack(downedPlayerID);
             OnPlayerRecovered?.Invoke(downedPlayerID);
             Debug.Log($"[Knockdown] P{downedPlayerID} recovered!");
@@ -369,6 +374,7 @@ public class KnockdownManager : MonoBehaviour
         {
             GetController(downedPlayerID)?.SetMovementEnabled(true);
             GetCombat(downedPlayerID)?.SetCombatEnabled(true);
+            GetPhysics(downedPlayerID)?.SetPhysicsEnabled(true);
             OnArmDetached?.Invoke(downedPlayerID);
             Debug.Log($"[Knockdown] P{downedPlayerID} arm detached — no more heavy attack!");
             CurrentState = KnockdownState.None;
@@ -447,4 +453,5 @@ public class KnockdownManager : MonoBehaviour
     private MultiplayerPlayerController GetController(int id) => id == 1 ? p1Controller : p2Controller;
     private PlayerHealth                GetHealth(int id)     => id == 1 ? p1Health      : p2Health;
     private CombatSystem                GetCombat(int id)     => id == 1 ? p1Combat       : p2Combat;
+    private VoodooPhysicsLayer          GetPhysics(int id)    => id == 1 ? p1Physics      : p2Physics;
 }

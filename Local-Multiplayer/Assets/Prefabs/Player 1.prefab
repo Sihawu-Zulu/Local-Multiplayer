@@ -5091,6 +5091,7 @@ GameObject:
   - component: {fileID: 3417163405035301617}
   - component: {fileID: 4956055455020561908}
   - component: {fileID: 3612485698855797261}
+  - component: {fileID: 887408344053961832}
   m_Layer: 0
   m_Name: Player 1
   m_TagString: Untagged
@@ -5210,3 +5211,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerArmMarker
   PlayerID: 1
   StringTrail: {fileID: 1312221821219210399}
+--- !u!114 &887408344053961832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7181846524182873350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e39c2f7f71e9324fbc038a683ca2d0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LimbLagMarker

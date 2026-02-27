@@ -43,7 +43,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     public event Action OnLightAttackEvent;
     public event Action OnHeavyAttackEvent;
     public event Action OnReactionEvent;
-    public event Action OnGetUpEvent;       
+    public event Action OnGetUpEvent;       // north button mash — recover from knockdown
 
     private bool movementEnabled = false;
     public bool BlockHeld { get; private set; }
@@ -172,6 +172,10 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     // lets knockdownmanager grab the visual slot to rotate/tumble it
     public Transform GetVisualSlot() => characterVisualSlot;
+
+    // voodoo physics layer reads these each frame
+    public Vector3 GetMoveDirection() => new Vector3(moveInput.x, 0f, 0f).normalized;
+    public bool    IsGrounded         => isGrounded;
 
     // -------------------------------------------------------
     // movement
