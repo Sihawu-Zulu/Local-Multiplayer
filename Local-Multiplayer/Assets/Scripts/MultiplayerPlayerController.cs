@@ -9,7 +9,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float jumpForce = 5f;
-    [SerializeField] private float gravity   = -18f;
+    [SerializeField] private float gravity = -18f;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
@@ -17,7 +17,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Character Setup")]
-    [SerializeField] private Transform  characterVisualSlot;
+    [SerializeField] private Transform characterVisualSlot;
     [SerializeField] private GameObject p1CharacterPrefab;
     [SerializeField] private GameObject p2CharacterPrefab;
 
@@ -52,7 +52,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     private void Awake()
     {
-        cc          = GetComponent<CharacterController>();
+        cc = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
     }
 
@@ -153,7 +153,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     public void OnBlock(InputAction.CallbackContext ctx)
     {
-        if (ctx.started)  BlockHeld = true;
+        if (ctx.started) BlockHeld = true;
         if (ctx.canceled) BlockHeld = false;
     }
 
@@ -175,7 +175,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     // voodoo physics layer reads these each frame
     public Vector3 GetMoveDirection() => new Vector3(moveInput.x, 0f, 0f).normalized;
-    public bool    IsGrounded         => isGrounded;
+    public bool IsGrounded => isGrounded;
 
     // -------------------------------------------------------
     // movement
@@ -202,7 +202,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     {
         if (!jumpQueued) return;
         verticalVelocity = jumpForce;
-        jumpQueued       = false;
+        jumpQueued = false;
     }
 
     private void MoveCharacter()
@@ -250,9 +250,9 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         if (!enabled)
         {
-            moveInput        = Vector2.zero;
+            moveInput = Vector2.zero;
             verticalVelocity = 0f;
-            jumpQueued       = false;
+            jumpQueued = false;
         }
     }
 
