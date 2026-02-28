@@ -1399,6 +1399,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95b938d0311ddf7449adbdfb08fad2f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraTargetController
+  playerDistance: 0
 --- !u!4 &471180777
 Transform:
   m_ObjectHideFlags: 0
@@ -3362,6 +3363,7 @@ GameObject:
   - component: {fileID: 1337619515}
   - component: {fileID: 1337619514}
   - component: {fileID: 1337619516}
+  - component: {fileID: 1337619517}
   m_Layer: 0
   m_Name: 'CM_FightCamera '
   m_TagString: Untagged
@@ -3446,6 +3448,24 @@ MonoBehaviour:
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
   FollowOffset: {x: 0, y: 2.2, z: -5.9}
+--- !u!114 &1337619517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337619513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 443178c6bd8925f4facd5d734c12bda9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraZoom
+  targetController: {fileID: 471180776}
+  minZoom: 10
+  maxZoom: 25
+  minDistance: 5
+  maxDistance: 30
+  zoomSpeed: 5
 --- !u!1 &1375217722
 GameObject:
   m_ObjectHideFlags: 0
@@ -3626,7 +3646,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 3f68e6261363f35449e172b40063ca46, type: 2}
     - target: {fileID: 919132149155446097, guid: e15602b0567581841a898b63efbfdfbd, type: 3}
       propertyPath: m_Name
-      value: Table
+      value: Table (Ground)
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e15602b0567581841a898b63efbfdfbd, type: 3}
       propertyPath: m_Layer
@@ -4309,7 +4329,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 9fe39cdbd19865141b009547ffd18f6a, type: 3}
       propertyPath: m_LocalScale.y
-      value: 2.324665
+      value: 2.1655006
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9fe39cdbd19865141b009547ffd18f6a, type: 3}
       propertyPath: m_LocalScale.z
@@ -4317,11 +4337,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9fe39cdbd19865141b009547ffd18f6a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.8
+      value: 7.7999997
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9fe39cdbd19865141b009547ffd18f6a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 7.28
+      value: 7.36
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9fe39cdbd19865141b009547ffd18f6a, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5319,13 +5339,13 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 937113475}
+  - {fileID: 1337619515}
+  - {fileID: 471180777}
   - {fileID: 808052631}
   - {fileID: 751338710}
   - {fileID: 277316808}
   - {fileID: 1880455354}
   - {fileID: 1276393225}
-  - {fileID: 1337619515}
-  - {fileID: 471180777}
   - {fileID: 1520624554}
   - {fileID: 1812908673}
   - {fileID: 404294838}

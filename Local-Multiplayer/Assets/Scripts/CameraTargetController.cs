@@ -5,6 +5,8 @@ public class CameraTargetController : MonoBehaviour
     private Transform player1;
     private Transform player2;
 
+    public float playerDistance; //debug
+
     void Update()
     {
         // If players not assigned yet, keep trying
@@ -29,6 +31,13 @@ public class CameraTargetController : MonoBehaviour
 
         Vector3 midpoint = (player1.position + player2.position) / 2f;
         transform.position = midpoint;
+
+        playerDistance = Vector3.Distance(player1.position, player2.position);
+    }
+
+    public float GetDistance()
+    {
+        return playerDistance;
     }
 
 
