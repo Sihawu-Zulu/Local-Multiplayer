@@ -1409,7 +1409,7 @@ Transform:
   m_GameObject: {fileID: 471180775}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.52712, y: 2.2, z: -5.9}
+  m_LocalPosition: {x: -0.52712, y: 0.5, z: -5.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2041,7 +2041,7 @@ Transform:
   m_GameObject: {fileID: 937113472}
   serializedVersion: 2
   m_LocalRotation: {x: 0.09885084, y: 0, z: 0, w: 0.9951023}
-  m_LocalPosition: {x: -0.52712, y: 4.4, z: -11.8}
+  m_LocalPosition: {x: -0.52712, y: 2.7, z: -11.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3423,7 +3423,7 @@ Transform:
   m_GameObject: {fileID: 1337619513}
   serializedVersion: 2
   m_LocalRotation: {x: 0.09885084, y: 0, z: 0, w: 0.9951023}
-  m_LocalPosition: {x: -0.52712, y: 4.4, z: -11.8}
+  m_LocalPosition: {x: -0.52712, y: 2.7, z: -11.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3461,11 +3461,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraZoom
   targetController: {fileID: 471180776}
-  minZoom: 10
-  maxZoom: 25
-  minDistance: 5
-  maxDistance: 30
-  zoomSpeed: 5
+  minZoom: 3.8
+  maxZoom: 22
+  minDistance: 4
+  maxDistance: 25
+  zoomSpeed: 7
 --- !u!1 &1375217722
 GameObject:
   m_ObjectHideFlags: 0
