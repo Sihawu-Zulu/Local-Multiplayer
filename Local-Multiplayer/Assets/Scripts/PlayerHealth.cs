@@ -1,17 +1,16 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-// tracks health, fires events 
-
+// tracks health and fires events
+// damage comes from two sources only: combat system hits, and string pulling during knockdown
+// killer shot reaction no longer deals direct damage — it just triggers the knockdown phase
 
 public class PlayerHealth : MonoBehaviour
 {
     [Header("Health Settings")]
-    [SerializeField] private float maxHealth = 100f;
-    [SerializeField] private float killerShotThreshold = 30f;   
-    [SerializeField] private float killerShotDamage    = 60f; 
+    [SerializeField] private float maxHealth           = 100f;
+    [SerializeField] private float killerShotThreshold = 30f;   // % hp at which killer shot triggers
 
-   
     [Header("Debug / Live View")]
     [SerializeField, Range(0f, 100f)] private float currentHealth;
 
@@ -22,9 +21,9 @@ public class PlayerHealth : MonoBehaviour
     public bool  KillerShotReady { get; private set; }
 
     // --- events ---
-    public UnityEvent<float, float> OnHealthChanged;        // (currentHP, maxHP)
-    public UnityEvent OnKillerShotTriggered;  
-    public UnityEvent OnPlayerDefeated;       // fires when HP hits 0
+    public UnityEvent<float, float> OnHealthChanged;      // (currentHP, maxHP)
+    public UnityEvent               OnKillerShotTriggered;
+    public UnityEvent               OnPlayerDefeated;
 
     // -------------------------------------------------------
 
@@ -32,7 +31,6 @@ public class PlayerHealth : MonoBehaviour
     {
         currentHealth = maxHealth;
     }
-
 
     public void TakeDamage(float amount)
     {
@@ -43,24 +41,19 @@ public class PlayerHealth : MonoBehaviour
 
         float pct = (currentHealth / maxHealth) * 100f;
 
+        // trigger killer shot phase once hp drops low enough — only fires once per life
         if (!KillerShotReady && pct <= killerShotThreshold)
         {
             KillerShotReady = true;
             OnKillerShotTriggered?.Invoke();
-            
         }
 
         if (currentHealth <= 0f)
         {
             IsDefeated = true;
             OnPlayerDefeated?.Invoke();
-            Debug.Log($"[{gameObject.name}] DEFEATED");
+            Debug.Log($"[{gameObject.name}] defeated");
         }
-    }
-
-    public void TakeKillerShotDamage()
-    {
-        TakeDamage(killerShotDamage);
     }
 
     public void ResetHealth()
@@ -69,6 +62,5 @@ public class PlayerHealth : MonoBehaviour
         IsDefeated      = false;
         KillerShotReady = false;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
-    
     }
 }

@@ -2,9 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
-// NEEEED to change it so that trigger prompt doesnt just end the round immediately — need to wait to finish and the damage to apply before ending the round
-//rn it just calls killerShotManager.EndKillerShot() which ends the phase and applies damage, but the round manager is subscribed to the OnKillerShotWinner event so it ends the round immediately when that event fires — need to add a delay or something so that the killer shot phase can finish properly before the round ends
-//
+// round ends only when a player's HP hits zero (OnPlayerDefeated)
+// killer shot winner triggers knockdown phase via knockdoenmanager, but does not end the round immediately
+// killer shot winner triggers knockdown via KnockdownManager... not a round ender
 
 public class RoundManager : MonoBehaviour
 {
@@ -39,7 +39,8 @@ public class RoundManager : MonoBehaviour
 
     private void Start()
     {
-        killerShotManager.OnKillerShotWinner.AddListener(OnKillerShotWon);
+        // round ends only when a player health reaches zero via OnPlayerDefeated
+        // killer shot winner no longer ends the round... it triggers knockdown instead
     }
 
     private void Update()
@@ -87,7 +88,7 @@ public class RoundManager : MonoBehaviour
 
     // -------------------------------------------------------
     // round flow
-    // -------------------------------------------------------
+   
 
     private IEnumerator StartRoundWithDelay()
     {
@@ -101,18 +102,6 @@ public class RoundManager : MonoBehaviour
     {
         if (roundOver) return;
         EndRound(winnerID: playerID == 1 ? 2 : 1);
-    }
-
-    private void OnKillerShotWon(int winnerID)
-    {
-        if (roundOver) return;
-        StartCoroutine(CheckRoundEndAfterKillerShot(winnerID));
-    }
-
-    private IEnumerator CheckRoundEndAfterKillerShot(int winnerID)
-    {
-        yield return null;  
-        if (!roundOver) EndRound(winnerID);
     }
 
     private void EndRound(int winnerID)
@@ -156,6 +145,6 @@ public class RoundManager : MonoBehaviour
         yield return new WaitForSeconds(roundEndDelay);
         OnMatchWon?.Invoke(winnerID);
        
-        // TODO: trigger match end screen / next mini-game
+        // TODO: trigger match end screen or something
     }
 }

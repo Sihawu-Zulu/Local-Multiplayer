@@ -2,16 +2,16 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
-// drives the voodoo doll knockdown phase after a killer shot connects
-// winner pushes the loser — they fly back and fall flat (visual slot rotates 90 on z)
-// downed player mashes GetUp (north button) — each press does a little random roll/tumble
+// puts the voodoo doll knockdown phase after a killer shot connects
+// winner pushes the loser ... they fly back and fall flat 
+// downed player mashes GetUp (north button) — each press does a little random roll/tumble which well use animations for @sihawuw
 // attacker holds Block/Left Trigger to pull the string and slowly detach the arm
 // if arm fully detaches — downed player loses heavy attack permanently for the round
 
 public class KnockdownManager : MonoBehaviour
 {
     [Header("Recovery Settings")]
-    [SerializeField] private int   mashesRequired    = 8;
+    [SerializeField] private int   mashesRequired    = 15;
     [SerializeField] private float recoveryTimeLimit = 6f;
 
     [Header("Tug Of War Settings")]
@@ -24,21 +24,21 @@ public class KnockdownManager : MonoBehaviour
 
     [Header("Knockback / Fall Settings")]
     [SerializeField] private float knockbackForce    = 12f;   // how hard the loser gets pushed on knockdown
-    [SerializeField] private float fallRotateDuration = 0.25f; // how long it takes to rotate flat
-    [SerializeField] private float fallRotateAngle   = 90f;   // z rotation when flat on the floor
+    [SerializeField] private float fallRotateDuration = 0.25f; 
+    [SerializeField] private float fallRotateAngle   = 90f;  
 
     [Header("Roll / Tumble Settings")]
-    [SerializeField] private float rollDuration      = 0.18f;  // how long each roll takes
-    [SerializeField] private float rollAngle         = 360f;   // full spin per mash
-    [SerializeField] private float rollMoveDistance  = 0.4f;   // how far they slide per roll
+    [SerializeField] private float rollDuration      = 0.18f; 
+    [SerializeField] private float rollAngle         = 360f;  
+    [SerializeField] private float rollMoveDistance  = 0.4f;   
 
-    // --- runtime resolved ---
+
     private Transform      p1ArmTransform;
     private Transform      p2ArmTransform;
     private ParticleSystem p1StringTrail;
     private ParticleSystem p2StringTrail;
 
-    // --- events ---
+    
     public UnityEvent<int>   OnKnockdownStarted;
     public UnityEvent<int>   OnPlayerRecovered;
     public UnityEvent<int>   OnArmDetached;
@@ -56,7 +56,7 @@ public class KnockdownManager : MonoBehaviour
     private VoodooPhysicsLayer p2Physics;
     private bool playersResolved = false;
 
-    // --- state ---
+   
     public KnockdownState CurrentState { get; private set; } = KnockdownState.None;
 
     private int   downedPlayerID   = 0;
@@ -71,7 +71,7 @@ public class KnockdownManager : MonoBehaviour
 
     private Coroutine rollCoroutine = null;
 
-    // -------------------------------------------------------
+    
 
     private void Update()
     {
@@ -91,9 +91,7 @@ public class KnockdownManager : MonoBehaviour
     public void OnP1GetUp() => p1GetUpPressed = true;
     public void OnP2GetUp() => p2GetUpPressed = true;
 
-    // -------------------------------------------------------
-    // resolve refs
-    // -------------------------------------------------------
+ 
 
     private void TryResolvePlayerReferences()
     {
@@ -127,9 +125,7 @@ public class KnockdownManager : MonoBehaviour
         if (p2Controller != null) p2Controller.OnGetUpEvent -= OnP2GetUp;
     }
 
-    // -------------------------------------------------------
-    // entry point
-    // -------------------------------------------------------
+ 
 
     public void StartKnockdown(int downedID)
     {
@@ -148,17 +144,15 @@ public class KnockdownManager : MonoBehaviour
         GetCombat(downedPlayerID)?.SetCombatEnabled(false);
         GetPhysics(downedPlayerID)?.SetPhysicsEnabled(false);   // pause ragdoll layer while on the floor
 
-        // push the downed player away from the attacker then tip them flat
+       
         ApplyKnockdownKnockback(downedID);
         StartCoroutine(FallFlat(downedID));
 
         OnKnockdownStarted?.Invoke(downedID);
-        Debug.Log($"[Knockdown] P{downedID} is downed — mash to get up!");
+       
     }
 
-    // -------------------------------------------------------
-    // knockback + fall flat
-    // -------------------------------------------------------
+
 
     private void ApplyKnockdownKnockback(int downedID)
     {
@@ -166,7 +160,7 @@ public class KnockdownManager : MonoBehaviour
         var attackerCtrl = GetController(downedID == 1 ? 2 : 1);
         if (downedCtrl == null || attackerCtrl == null) return;
 
-        // direction away from the attacker, slight upward pop
+       
         Vector3 diff = downedCtrl.transform.position - attackerCtrl.transform.position;
         diff.y = 0f;
         Vector3 dir = diff.magnitude > 0.01f ? diff.normalized : Vector3.right;
@@ -175,7 +169,7 @@ public class KnockdownManager : MonoBehaviour
         downedCtrl.ApplyKnockback(force);
     }
 
-    // rotates the character visual slot 90° on z so they lie flat
+    
     private IEnumerator FallFlat(int playerID)
     {
         var ctrl = GetController(playerID);
@@ -200,16 +194,15 @@ public class KnockdownManager : MonoBehaviour
         visual.localRotation = endRot;
     }
 
-    // -------------------------------------------------------
-    // update loops
-    // -------------------------------------------------------
+
 
     private void HandleMashInput()
     {
         bool pressed = downedPlayerID == 1 ? p1GetUpPressed : p2GetUpPressed;
 
         if (downedPlayerID == 1) p1GetUpPressed = false;
-        else                     p2GetUpPressed = false;
+        else                    
+         p2GetUpPressed = false;
 
         if (!pressed) return;
 
@@ -220,10 +213,13 @@ public class KnockdownManager : MonoBehaviour
         if (rollCoroutine != null) StopCoroutine(rollCoroutine);
         rollCoroutine = StartCoroutine(TumbleRoll(downedPlayerID));
 
-        Debug.Log($"[Knockdown] P{downedPlayerID} mashed {mashCount}/{mashesRequired}");
+        Debug.Log($"[Knockdown] P{downedPlayerID} mashed {mashCount}/{mashesRequired} — [ANIM] GetUp mash {mashCount}");
 
         if (mashCount >= mashesRequired)
+        {
+           
             Recover();
+        }
     }
 
     // spins the visual one full rotation on z in a random direction and slides them slightly
@@ -259,25 +255,34 @@ public class KnockdownManager : MonoBehaviour
 
     private void HandleTugInput()
     {
+        // string pulling is only active when the player is downed
+        if (CurrentState != KnockdownState.Downed && CurrentState != KnockdownState.TugOfWar) return;
+
         var attackerController = GetController(attackerPlayerID);
         if (attackerController == null) return;
 
         bool isTugging = attackerController.BlockHeld;
 
-        var trail = attackerPlayerID == 1 ? p1StringTrail : p2StringTrail;
+        // trail/string particle emits from the DOWNED player's arm — not the attacker's
+        var trail = downedPlayerID == 1 ? p1StringTrail : p2StringTrail;
         if (trail != null)
         {
             if (isTugging && !trail.isPlaying) trail.Play();
-            if (!isTugging && trail.isPlaying) trail.Stop();
+            if (!isTugging && trail.isPlaying)  trail.Stop();
         }
 
         if (isTugging)
         {
+            CurrentState = KnockdownState.TugOfWar;
             tugProgress += tugProgressPerSecond * Time.deltaTime;
+            // string pulling drains the downed player's health
             GetHealth(downedPlayerID)?.TakeDamage(tugDamagePerSecond * Time.deltaTime);
         }
         else
         {
+            if (CurrentState == KnockdownState.TugOfWar)
+                CurrentState = KnockdownState.Downed;
+
             tugProgress -= tugDecayPerSecond * Time.deltaTime;
         }
 
@@ -295,15 +300,14 @@ public class KnockdownManager : MonoBehaviour
 
         if (recoveryTimer >= recoveryTimeLimit)
         {
-            Debug.Log($"[Knockdown] P{downedPlayerID} ran out of time");
+           
             DetachArm();
         }
     }
 
-    // -------------------------------------------------------
+    // ======
     // outcomes
-    // -------------------------------------------------------
-
+    
     private void Recover()
     {
         if (CurrentState == KnockdownState.None) return;
@@ -319,12 +323,12 @@ public class KnockdownManager : MonoBehaviour
             GetPhysics(downedPlayerID)?.SetPhysicsEnabled(true);
             SnapArmBack(downedPlayerID);
             OnPlayerRecovered?.Invoke(downedPlayerID);
-            Debug.Log($"[Knockdown] P{downedPlayerID} recovered!");
+           
             CurrentState = KnockdownState.None;
         }));
     }
 
-    // tweens the visual back upright before re-enabling control
+    
     private IEnumerator StandUp(int playerID, System.Action onComplete)
     {
         var ctrl = GetController(playerID);
@@ -350,6 +354,7 @@ public class KnockdownManager : MonoBehaviour
         visual.localRotation = Quaternion.identity;
         visual.localPosition = Vector3.zero;
 
+        Debug.Log($"[Knockdown] P{playerID} — [animation] StandUp animation complete");
         onComplete?.Invoke();
     }
 
@@ -369,21 +374,21 @@ public class KnockdownManager : MonoBehaviour
 
         GetCombat(downedPlayerID)?.SetHeavyAttackEnabled(false);
 
-        // still stand them up — just weaker
+        // still stand them up... just weaker
         StartCoroutine(StandUp(downedPlayerID, onComplete: () =>
         {
             GetController(downedPlayerID)?.SetMovementEnabled(true);
             GetCombat(downedPlayerID)?.SetCombatEnabled(true);
             GetPhysics(downedPlayerID)?.SetPhysicsEnabled(true);
             OnArmDetached?.Invoke(downedPlayerID);
-            Debug.Log($"[Knockdown] P{downedPlayerID} arm detached — no more heavy attack!");
+            Debug.Log($"[Knockdown] P{downedPlayerID} arm detached... no more heavy attack!");
             CurrentState = KnockdownState.None;
         }));
     }
 
-    // -------------------------------------------------------
+    // 
     // arm visual
-    // -------------------------------------------------------
+    
 
     private void UpdateArmPosition(int playerID, float progress)
     {
@@ -401,7 +406,7 @@ public class KnockdownManager : MonoBehaviour
 
     // -------------------------------------------------------
     // reset
-    // -------------------------------------------------------
+    
 
     public void ResetKnockdown()
     {
@@ -424,7 +429,7 @@ public class KnockdownManager : MonoBehaviour
         ResetVisual(1);
         ResetVisual(2);
 
-        Debug.Log("[Knockdown] reset");
+        // Debug.Log("[Knockdown] reset");
     }
 
     private void ResetVisual(int playerID)
@@ -439,9 +444,7 @@ public class KnockdownManager : MonoBehaviour
 
     public bool IsArmGone(int playerID) => playerID == 1 ? p1ArmGone : p2ArmGone;
 
-    // -------------------------------------------------------
-    // helpers
-    // -------------------------------------------------------
+ 
 
     private void StopStringTrails()
     {

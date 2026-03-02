@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 
 
-// and a tug-of-war progress bar showing how close the arm is to detaching
+// and a tug-of-war progress bar showing how close the arm is to detaching maybe for jaiden
 
 public class KnockdownUI : MonoBehaviour
 {
@@ -22,7 +22,7 @@ public class KnockdownUI : MonoBehaviour
 
     [Header("Tug Of War Bar")]
     [SerializeField] private GameObject tugBarRoot;
-    [SerializeField] private Slider     tugProgressSlider;       // fill goes 0-1 as arm detaches
+    [SerializeField] private Slider     tugProgressSlider;       
     [SerializeField] private Image      tugFillImage;
     [SerializeField] private Color      tugColorSafe    = new Color(0.2f, 0.9f, 0.4f);
     [SerializeField] private Color      tugColorDanger  = new Color(0.9f, 0.15f, 0.1f);
@@ -32,7 +32,7 @@ public class KnockdownUI : MonoBehaviour
 
     // --- state ---
     private bool   isPulsing    = false;
-    private int   totalMashes  = 8;     // just for display 
+    private int   totalMashes  = 15;    
     private Coroutine pulseRoutine;
 
     // -------------------------------------------------------
@@ -43,7 +43,7 @@ public class KnockdownUI : MonoBehaviour
 
         if (knockdownManager == null)
         {
-            Debug.LogWarning("[KnockdownUI] knocmanager not assigned");
+           
             return;
         }
 
@@ -54,7 +54,7 @@ public class KnockdownUI : MonoBehaviour
         knockdownManager.OnMashProgress.AddListener(UpdateMashCount);
     }
 
-    // -------------------------------------------------------
+    // ===================================
 
     private void OnKnockdownStarted(int downedPlayerID)
     {
@@ -83,7 +83,7 @@ public class KnockdownUI : MonoBehaviour
         if (tugBarRoot != null) tugBarRoot.SetActive(false);
     }
 
-    // -------------------------------------------------------
+    // -============================================================
 
     private void UpdateMashCount(int count)
     {
@@ -101,9 +101,7 @@ public class KnockdownUI : MonoBehaviour
             tugFillImage.color = Color.Lerp(tugColorSafe, tugColorDanger, progress);
     }
 
-    // -------------------------------------------------------
-    //
-    // -------------------------------------------------------
+ 
 
     private IEnumerator PulseRoutine()
     {
