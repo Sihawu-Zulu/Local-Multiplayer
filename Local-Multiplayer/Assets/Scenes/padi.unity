@@ -6982,6 +6982,8 @@ MonoBehaviour:
   menuCanvasGO: {fileID: 1381299061}
   settingsCanvasGO: {fileID: 750098145}
   player: {fileID: 3532998573399416451, guid: b2d1d939b6a6cd540a33a9605d12e7b5, type: 3}
+  combat: {fileID: 2274413457630315643, guid: b2d1d939b6a6cd540a33a9605d12e7b5, type: 3}
+  health: {fileID: 2810751942479351812, guid: b2d1d939b6a6cd540a33a9605d12e7b5, type: 3}
 --- !u!1 &404294837
 GameObject:
   m_ObjectHideFlags: 0

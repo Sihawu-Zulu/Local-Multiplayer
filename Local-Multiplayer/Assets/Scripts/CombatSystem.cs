@@ -4,8 +4,8 @@ using UnityEngine;
 public class CombatSystem : MonoBehaviour
 {
     [Header("Damage Values")]
-    [SerializeField] private float lightAttackDamage    = 10f;
-    [SerializeField] private float heavyAttackDamage    = 20f;
+    [SerializeField] private float lightAttackDamage = 10f;
+    [SerializeField] private float heavyAttackDamage = 20f;
     [SerializeField] private float blockDamageReduction = 0.5f;
 
     [Header("Cooldowns")]
@@ -16,9 +16,9 @@ public class CombatSystem : MonoBehaviour
     [SerializeField] private float attackRange = 4.5f;
 
     [Header("Knockback")]
-    [SerializeField] private float lightKnockbackForce  = 4f;
-    [SerializeField] private float heavyKnockbackForce  = 8f;
-    [SerializeField] private float knockbackUpAngle     = 0.2f;
+    [SerializeField] private float lightKnockbackForce = 4f;
+    [SerializeField] private float heavyKnockbackForce = 8f;
+    [SerializeField] private float knockbackUpAngle = 0.2f;
     [SerializeField] private float blockedKnockbackMult = 0.4f;
 
     // --- resolved at start / update ---
@@ -29,12 +29,12 @@ public class CombatSystem : MonoBehaviour
     private bool opponentLinked = false;
 
     // --- state ---
-    public  bool IsBlocking  { get; private set; }
-    public  bool IsAttacking { get; private set; }
-    private bool canLight      = true;
-    private bool canHeavy      = true;
+    public bool IsBlocking { get; private set; }
+    public bool IsAttacking { get; private set; }
+    private bool canLight = true;
+    private bool canHeavy = true;
     private bool combatEnabled = true;
-    private bool heavyEnabled  = true;   // flipped false when arm detaches — stays off for the round
+    private bool heavyEnabled = true;   // flipped false when arm detaches — stays off for the round
 
     private MultiplayerPlayerController controller;
 
@@ -43,10 +43,10 @@ public class CombatSystem : MonoBehaviour
     private void Awake()
     {
         controller = GetComponent<MultiplayerPlayerController>();
-        myHealth   = GetComponent<PlayerHealth>();
+        myHealth = GetComponent<PlayerHealth>();
 
         if (controller == null) Debug.LogError($"[CombatSystem] {gameObject.name} — no controller");
-        if (myHealth   == null) Debug.LogError($"[CombatSystem] {gameObject.name} — no health");
+        if (myHealth == null) Debug.LogError($"[CombatSystem] {gameObject.name} — no health");
     }
 
     private void Start()
@@ -89,10 +89,10 @@ public class CombatSystem : MonoBehaviour
         foreach (var other in allCombat)
         {
             if (other == this) continue;
-            opponentHealth     = other.GetComponent<PlayerHealth>();
-            opponentCombat     = other;
+            opponentHealth = other.GetComponent<PlayerHealth>();
+            opponentCombat = other;
             opponentController = other.GetComponent<MultiplayerPlayerController>();
-            opponentLinked     = true;
+            opponentLinked = true;
             Debug.Log($"[P{controller.PlayerID} CombatSystem] opponent linked");
             break;
         }
@@ -130,7 +130,7 @@ public class CombatSystem : MonoBehaviour
         IsAttacking = true;
 
         if (type == "LIGHT") canLight = false;
-        else                 canHeavy = false;
+        else canHeavy = false;
 
         Debug.Log($"[P{controller.PlayerID}] {type} ATTACK");
 
@@ -140,7 +140,7 @@ public class CombatSystem : MonoBehaviour
         {
             bool isBlocked = opponentCombat != null && opponentCombat.IsBlocking;
 
-            float finalDamage    = isBlocked ? damage * (1f - blockDamageReduction) : damage;
+            float finalDamage = isBlocked ? damage * (1f - blockDamageReduction) : damage;
             float finalKnockback = isBlocked ? knockbackForce * blockedKnockbackMult : knockbackForce;
 
             opponentHealth.TakeDamage(finalDamage);
@@ -156,7 +156,7 @@ public class CombatSystem : MonoBehaviour
             opponentController?.ApplyKnockback(knockbackDir * finalKnockback);
 
             if (isBlocked) Debug.Log($"[P{controller.PlayerID}] {type} BLOCKED");
-            else           Debug.Log($"[P{controller.PlayerID}] {type} hit");
+            else Debug.Log($"[P{controller.PlayerID}] {type} hit");
         }
         else
         {
@@ -169,7 +169,7 @@ public class CombatSystem : MonoBehaviour
         yield return new WaitForSeconds(cooldown - 0.1f);
 
         if (type == "LIGHT") canLight = true;
-        else                 canHeavy = true;
+        else canHeavy = true;
     }
 
     // -------------------------------------------------------
@@ -182,7 +182,8 @@ public class CombatSystem : MonoBehaviour
 
         if (!enabled)
         {
-            IsBlocking  = false;
+            StopAllCoroutines();
+            IsBlocking = false;
             IsAttacking = false;
         }
     }

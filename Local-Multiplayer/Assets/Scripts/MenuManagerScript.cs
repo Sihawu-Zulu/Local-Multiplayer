@@ -11,6 +11,8 @@ public class MenuManagerScript : MonoBehaviour
 
     [Header("Scripts Disabled when paused")]
     [SerializeField] private MultiplayerPlayerController player;
+    [SerializeField] private CombatSystem combat;
+    [SerializeField] private PlayerHealth health;
 
 
     private bool isPaused;
@@ -45,7 +47,8 @@ public class MenuManagerScript : MonoBehaviour
         isPaused = true;
         Time.timeScale = 0f;
 
-        player.enabled = false;
+        DisableAllPlayers();
+
         OpenMainMenu();
     }
 
@@ -54,11 +57,45 @@ public class MenuManagerScript : MonoBehaviour
         isPaused = false;
         Time.timeScale = 1f;
 
-        player.enabled = true;
+        EnableAllPlayers();
 
         MainCanvasGO.SetActive(true);
         CloseAllMenus();
     }
+    #endregion
+
+    #region Disabling/Enabling Movement Script
+
+    private void DisableAllPlayers()
+    {
+        MultiplayerPlayerController[] players =
+            FindObjectsOfType<MultiplayerPlayerController>();
+
+        foreach (var player in players)
+        {
+            player.enabled = false;
+
+            CombatSystem combat = player.GetComponent<CombatSystem>();
+            if (combat != null)
+                combat.SetCombatEnabled(false);
+        }
+    }
+
+    private void EnableAllPlayers()
+    {
+        MultiplayerPlayerController[] players =
+            FindObjectsOfType<MultiplayerPlayerController>();
+
+        foreach (var player in players)
+        {
+            player.enabled = true;
+
+            CombatSystem combat = player.GetComponent<CombatSystem>();
+            if (combat != null)
+                combat.SetCombatEnabled(true);
+        }
+    }
+
     #endregion
 
     #region Canvas Activations/Deactivations
