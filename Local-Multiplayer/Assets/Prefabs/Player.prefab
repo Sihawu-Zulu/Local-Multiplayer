@@ -186,7 +186,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1851244460066674257}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1042f4248b961b148a96735a0f36191d, type: 3}
   m_Name: 
@@ -342,6 +342,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 25daa40d-d563-41ef-ab8d-7f38e787644c
     m_ActionName: 'PlayerControls/GetUp[/DualShock4GamepadHID/buttonNorth]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b2ab07ff-dd9f-4907-974d-23a20ee19a42
+    m_ActionName: 'UI/MenuOpenClose[/Keyboard/escape,/XInputControllerWindows/start]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: PlayerControls

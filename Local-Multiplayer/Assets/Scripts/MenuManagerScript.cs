@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class MenuManagerScript : MonoBehaviour
 {
+    [Header("Canvas's")]
     [SerializeField] private GameObject MainCanvasGO;
-
     [SerializeField] private GameObject menuCanvasGO;
     [SerializeField] private GameObject settingsCanvasGO;
+
+    [Header("Scripts Disabled when paused")]
+    [SerializeField] private MultiplayerPlayerController player;
 
 
     private bool isPaused;
@@ -42,6 +45,7 @@ public class MenuManagerScript : MonoBehaviour
         isPaused = true;
         Time.timeScale = 0f;
 
+        player.enabled = false;
         OpenMainMenu();
     }
 
@@ -49,6 +53,8 @@ public class MenuManagerScript : MonoBehaviour
     {
         isPaused = false;
         Time.timeScale = 1f;
+
+        player.enabled = true;
 
         MainCanvasGO.SetActive(true);
         CloseAllMenus();

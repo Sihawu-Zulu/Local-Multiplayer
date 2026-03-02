@@ -1116,11 +1116,10 @@ GameObject:
   m_Component:
   - component: {fileID: 277316808}
   - component: {fileID: 277316807}
+  - component: {fileID: 277316814}
   - component: {fileID: 277316809}
   - component: {fileID: 277316810}
   - component: {fileID: 277316811}
-  - component: {fileID: 277316813}
-  - component: {fileID: 277316814}
   m_Layer: 0
   m_Name: <<<---GameManager--->>>
   m_TagString: Untagged
@@ -1313,36 +1312,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &277316813
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 277316806}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
-  m_Actions: {fileID: -944628639613478452, guid: c72fde7d841ad85409177be57f718a6a, type: 3}
-  m_NotificationBehavior: 0
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents: []
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
-  m_DefaultActionMap: UI
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
 --- !u!114 &277316814
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1350,11 +1319,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 277316806}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a94ebb69cf51f4f479b8e4381b4b45d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuInputManager
+  menuOpenCloseAction: {fileID: 3906513150703437070, guid: c72fde7d841ad85409177be57f718a6a, type: 3}
 --- !u!1 &309718577
 GameObject:
   m_ObjectHideFlags: 0
@@ -7011,6 +6981,7 @@ MonoBehaviour:
   MainCanvasGO: {fileID: 1880455350}
   menuCanvasGO: {fileID: 1381299061}
   settingsCanvasGO: {fileID: 750098145}
+  player: {fileID: 3532998573399416451, guid: b2d1d939b6a6cd540a33a9605d12e7b5, type: 3}
 --- !u!1 &404294837
 GameObject:
   m_ObjectHideFlags: 0
