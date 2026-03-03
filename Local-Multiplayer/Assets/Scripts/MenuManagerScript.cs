@@ -1,6 +1,8 @@
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class MenuManagerScript : MonoBehaviour
 {
@@ -13,6 +15,13 @@ public class MenuManagerScript : MonoBehaviour
     [SerializeField] private MultiplayerPlayerController player;
     [SerializeField] private CombatSystem combat;
     [SerializeField] private PlayerHealth health;
+
+    [Header("First Selected Options")]
+    [SerializeField] private GameObject menuFirst;
+    [SerializeField] private GameObject settingsFirst;
+    [SerializeField] private GameObject returnFirst;
+
+
 
 
     private bool isPaused;
@@ -106,12 +115,54 @@ public class MenuManagerScript : MonoBehaviour
         menuCanvasGO.SetActive(true);
         settingsCanvasGO.SetActive(false);
 
+        EventSystem.current.SetSelectedGameObject(menuFirst);
+
+    }
+
+    private void OpenSettingsMenuHandle()
+    {
+        settingsCanvasGO.SetActive(true);
+        MainCanvasGO.SetActive(false);
+        menuCanvasGO.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(menuFirst);
+        EventSystem.current.SetSelectedGameObject(returnFirst);
+
+
     }
 
     private void CloseAllMenus()
     {
         menuCanvasGO.SetActive(false);
         settingsCanvasGO.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(null);
+
     }
+    #endregion
+
+    #region Menu Button Actions
+
+    public void OnSettingsPress()
+    {
+        OpenSettingsMenuHandle();
+    }
+
+    public void OnResumePress()
+    {
+        Unpause();
+    }
+
+    #endregion
+
+    #region Settings Menu Actions
+
+    public void OnSettingsReturnPress()
+    {
+        OpenMainMenu();
+
+
+    }
+
     #endregion
 }

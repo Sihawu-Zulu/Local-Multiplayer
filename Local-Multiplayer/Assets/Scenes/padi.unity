@@ -6984,6 +6984,9 @@ MonoBehaviour:
   player: {fileID: 3532998573399416451, guid: b2d1d939b6a6cd540a33a9605d12e7b5, type: 3}
   combat: {fileID: 2274413457630315643, guid: b2d1d939b6a6cd540a33a9605d12e7b5, type: 3}
   health: {fileID: 2810751942479351812, guid: b2d1d939b6a6cd540a33a9605d12e7b5, type: 3}
+  menuFirst: {fileID: 1045557121}
+  settingsFirst: {fileID: 897156162}
+  returnFirst: {fileID: 766963042}
 --- !u!1 &404294837
 GameObject:
   m_ObjectHideFlags: 0
@@ -13080,16 +13083,16 @@ MonoBehaviour:
   m_Navigation:
     m_Mode: 3
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
+    m_SelectOnUp: {fileID: 1045557123}
+    m_SelectOnDown: {fileID: 1045557123}
+    m_SelectOnLeft: {fileID: 1045557123}
+    m_SelectOnRight: {fileID: 1045557123}
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.4409459, g: 0, b: 0.4415095, a: 1}
     m_PressedColor: {r: 0.7507326, g: 0, b: 0.96981126, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_SelectedColor: {r: 1, g: 0, b: 0, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -13108,7 +13111,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 766963045}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 396954067}
+        m_TargetAssemblyTypeName: MenuManagerScript, Assembly-CSharp
+        m_MethodName: OnSettingsReturnPress
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &766963045
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18550,8 +18565,8 @@ MonoBehaviour:
   m_Navigation:
     m_Mode: 3
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 1045557123}
+    m_SelectOnDown: {fileID: 1045557123}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -18559,7 +18574,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.4409459, g: 0, b: 0.4415095, a: 1}
     m_PressedColor: {r: 0.7507326, g: 0, b: 0.96981126, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_SelectedColor: {r: 1, g: 0, b: 0, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -18578,7 +18593,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 897156165}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 396954067}
+        m_TargetAssemblyTypeName: MenuManagerScript, Assembly-CSharp
+        m_MethodName: OnSettingsPress
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &897156165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24512,7 +24539,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.4409459, g: 0, b: 0.4415095, a: 1}
     m_PressedColor: {r: 0.7507326, g: 0, b: 0.96981126, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_SelectedColor: {r: 1, g: 0, b: 0, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -24531,7 +24558,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1045557124}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 396954067}
+        m_TargetAssemblyTypeName: MenuManagerScript, Assembly-CSharp
+        m_MethodName: OnResumePress
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1045557124
 MonoBehaviour:
   m_ObjectHideFlags: 0
