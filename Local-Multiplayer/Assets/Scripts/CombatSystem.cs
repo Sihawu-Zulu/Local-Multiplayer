@@ -185,6 +185,10 @@ public class CombatSystem : MonoBehaviour
             StopAllCoroutines();
             IsBlocking = false;
             IsAttacking = false;
+
+            canLight = true;
+            canHeavy = true;
+
         }
     }
 
