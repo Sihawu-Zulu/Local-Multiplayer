@@ -6437,6 +6437,11 @@ MonoBehaviour:
   tugProgressPerSecond: 0.15
   tugDecayPerSecond: 0.08
   armDetachedOffset: {x: 0.5, y: -0.3, z: 0}
+  knockdownShakeMagnitude: 0.2
+  knockdownShakeDuration: 0.25
+  armDetachShakeMagnitude: 0.35
+  armDetachShakeDuration: 0.3
+  armDetachHitStopDur: 0.12
   knockbackForce: 4
   fallRotateDuration: 0.25
   fallRotateAngle: 90
@@ -25488,7 +25493,7 @@ MonoBehaviour:
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: 0, y: 2.2, z: -3.8}
+  FollowOffset: {x: 0, y: 2.2, z: -3.800004}
 --- !u!114 &1337619517
 MonoBehaviour:
   m_ObjectHideFlags: 0

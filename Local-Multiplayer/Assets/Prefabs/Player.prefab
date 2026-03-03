@@ -49,6 +49,7 @@ GameObject:
   - component: {fileID: 2810751942479351812}
   - component: {fileID: 2274413457630315643}
   - component: {fileID: 3938374522214678538}
+  - component: {fileID: 7996419240934395138}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -365,7 +366,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 100
   killerShotThreshold: 30
-  killerShotDamage: 60
   currentHealth: 0
   OnHealthChanged:
     m_PersistentCalls:
@@ -410,6 +410,11 @@ MonoBehaviour:
   heavyKnockbackForce: 3
   knockbackUpAngle: 0.2
   blockedKnockbackMult: 0.4
+  lightHitStopDuration: 0.04
+  heavyHitStopDuration: 0.09
+  lightShakeMagnitude: 0.05
+  heavyShakeMagnitude: 0.13
+  shakeDuration: 0.15
 --- !u!114 &3938374522214678538
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -433,6 +438,23 @@ MonoBehaviour:
   bounceDecay: 4
   limbLagSmoothing: 4
   limbLagPositionScale: 0.3
+--- !u!114 &7996419240934395138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851244460066674257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a270f9e1ce22cd4d91032525cac61bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatVFX
+  lightHitBurst: {fileID: 0}
+  heavyHitBurst: {fileID: 0}
+  blockSpark: {fileID: 0}
+  knockdownDust: {fileID: 0}
+  armDetachBurst: {fileID: 0}
 --- !u!1 &3178662676928722422
 GameObject:
   m_ObjectHideFlags: 0
