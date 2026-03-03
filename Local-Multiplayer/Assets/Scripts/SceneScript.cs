@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 public class SceneScript : MonoBehaviour
@@ -7,16 +9,21 @@ public class SceneScript : MonoBehaviour
     public GameObject optionsPanel;
     public GameObject creditsPanel;
 
+    [Header("First Selected Options")]
+    [SerializeField] private GameObject mainMenuFirst;
+    [SerializeField] private GameObject optionsFirst;
 
     public void SceneSwitch(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
         Debug.Log($"Loading scene: {sceneName}");
+
     }
 
     public void ShowOptions()
     {
         optionsPanel.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(mainMenuFirst);
 
     }
 
