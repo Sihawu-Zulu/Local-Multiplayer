@@ -1,25 +1,21 @@
 using UnityEngine;
 
-// attach to each player - holds vfx prefab/particle references
-// called by combatsystem and knockdownmanager when impacts happen
-// uses world-space position of the hit so particles spawn at the right spot
+// i must remember to attach to each player 
+
 
 public class CombatVFX : MonoBehaviour
 {
     [Header("Hit VFX")]
-    public ParticleSystem lightHitBurst;    // small pop on light hit
-    public ParticleSystem heavyHitBurst;    // bigger burst on heavy hit
-    public ParticleSystem blockSpark;       // spark when a hit is blocked
-
+    public ParticleSystem lightHitBurst;    
+    public ParticleSystem heavyHitBurst;    
+    public ParticleSystem blockSpark;       
     [Header("Knockdown VFX")]
-    public ParticleSystem knockdownDust;    // dust cloud when player hits the floor
+    public ParticleSystem knockdownDust;    
 
     [Header("Arm Detach VFX")]
     public ParticleSystem armDetachBurst;   // thread explosion when arm pops off
 
-    // -------------------------------------------------------
-
-    // called with the world position of the opponent so the burst spawns at the impact point
+ 
     public void PlayLightHit(Vector3 worldPos)
     {
         PlayAt(lightHitBurst, worldPos);
@@ -46,7 +42,7 @@ public class CombatVFX : MonoBehaviour
         PlayAt(armDetachBurst, armWorldPos);
     }
 
-    // -------------------------------------------------------
+   
 
     private void PlayAt(ParticleSystem ps, Vector3 pos)
     {

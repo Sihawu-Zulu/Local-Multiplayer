@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// singleton audio manager with a pooled audiosource list
-// assign clips in inspector, call AudioManager.Instance.Play() anywhere
-// string pull gets its own dedicated looping source
+
 
 public class AudioManager : MonoBehaviour
 {
@@ -18,12 +16,12 @@ public class AudioManager : MonoBehaviour
 
     [Header("Knockdown SFX")]
     public AudioClip knockdownFall;
-    public AudioClip mashGetUp;       // plays each mash press
+    public AudioClip mashGetUp;       
     public AudioClip standUpSuccess;
 
     [Header("Arm SFX")]
     public AudioClip armDetach;
-    public AudioClip stringPullLoop;  // looping — started/stopped by KnockdownManager
+    public AudioClip stringPullLoop; 
 
     [Header("Killer Shot SFX")]
     public AudioClip killerShotTrigger;
@@ -32,9 +30,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float masterVolume = 1f;
 
     private List<AudioSource> pool   = new List<AudioSource>();
-    private AudioSource       loopSrc;   // dedicated source for string pull loop
+    private AudioSource loopSrc;   
 
-    // -------------------------------------------------------
 
     private void Awake()
     {
@@ -59,9 +56,7 @@ public class AudioManager : MonoBehaviour
         loopSrc.volume      = masterVolume * 0.55f;
     }
 
-    // -------------------------------------------------------
-
-    // play a one-shot from the pool with optional pitch variance to avoid robotic repetition
+  
     public void Play(AudioClip clip, float volume = 1f, float pitchVariance = 0f)
     {
         if (clip == null) return;
@@ -92,7 +87,7 @@ public class AudioManager : MonoBehaviour
         foreach (var s in pool)
             if (!s.isPlaying) return s;
 
-        // pool exhausted — reuse oldest rather than dropping the sound
+       
         return pool[0];
     }
 }
