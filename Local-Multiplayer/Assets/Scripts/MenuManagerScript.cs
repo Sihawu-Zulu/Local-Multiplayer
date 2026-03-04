@@ -64,7 +64,7 @@ public class MenuManagerScript : MonoBehaviour
 
         DisableAllPlayers();
 
-        OpenMainMenu();
+        OpenMenu();
     }
 
     public void Unpause()
@@ -115,7 +115,7 @@ public class MenuManagerScript : MonoBehaviour
 
     #region Canvas Activations/Deactivations
 
-    private void OpenMainMenu()
+    private void OpenMenu()
     {
         MainCanvasGO.SetActive(false);
         menuCanvasGO.SetActive(true);
@@ -176,7 +176,7 @@ public class MenuManagerScript : MonoBehaviour
     }
     #endregion
 
-    #region Menu Text Button Actions
+    #region Menu Actions
 
     public void OnSettingsPress()
     {
@@ -194,7 +194,7 @@ public class MenuManagerScript : MonoBehaviour
 
     public void CloseSettingsPress()
     {
-        OpenMainMenu();
+        OpenMenu();
     }
 
     public void OnControllerPress()

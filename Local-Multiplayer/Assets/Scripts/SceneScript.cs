@@ -5,50 +5,145 @@ using UnityEngine.SceneManagement;
 
 public class SceneScript : MonoBehaviour
 {
-    [Header("Menu Options")]
-    public GameObject optionsPanel;
-    public GameObject creditsPanel;
+    [Header("Canvas's")]
+    [SerializeField] private GameObject mainCanvasGO;
+    [SerializeField] private GameObject optionsCanvasGO;
+    [SerializeField] private GameObject controllerCanvasGO;
+    [SerializeField] private GameObject keyboardCanvasGO;
+    [SerializeField] private GameObject creditsCanvasGO;
+
 
     [Header("First Selected Options")]
-    [SerializeField] private GameObject mainMenuFirst;
+    [SerializeField] private GameObject startGameFirst;
     [SerializeField] private GameObject optionsFirst;
+    [SerializeField] private GameObject controllerFirst;
+    [SerializeField] private GameObject keyboardFirst;
+    [SerializeField] private GameObject creditsFirst;
+
 
     void Start()
     {
-        EventSystem.current.SetSelectedGameObject(mainMenuFirst);
+        mainCanvasGO.SetActive(true);
+        optionsCanvasGO.SetActive(false);
+        controllerCanvasGO.SetActive(false);
+        keyboardCanvasGO.SetActive(false);
+        creditsCanvasGO.SetActive(false);
+
+
+        EventSystem.current.SetSelectedGameObject(startGameFirst);
 
     }
+
+    #region Scene Switcher
     public void SceneSwitch(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
         Debug.Log($"Loading scene: {sceneName}");
 
     }
+    #endregion
 
-    public void ShowOptions()
+    #region Canvas Activations/Deactivations
+
+    private void OpenMainMenu()
     {
-        optionsPanel.SetActive(true);
+        mainCanvasGO.SetActive(true);
+        optionsCanvasGO.SetActive(false);
+        controllerCanvasGO.SetActive(false);
+        keyboardCanvasGO.SetActive(false);
+        creditsCanvasGO.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(startGameFirst);
+
+    }
+    private void OpenOptions()
+    {
+        mainCanvasGO.SetActive(false);
+        optionsCanvasGO.SetActive(true);
+        controllerCanvasGO.SetActive(false);
+        keyboardCanvasGO.SetActive(false);
+        creditsCanvasGO.SetActive(false);
+
+
+        EventSystem.current.SetSelectedGameObject(optionsFirst);
+
 
     }
 
-    public void HideOptions()
+    private void OpenController()
     {
-        optionsPanel.SetActive(false);
+        mainCanvasGO.SetActive(false);
+        optionsCanvasGO.SetActive(false);
+        controllerCanvasGO.SetActive(true);
+        keyboardCanvasGO.SetActive(false);
+        creditsCanvasGO.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(controllerFirst);
+
+
     }
 
-    public void ShowCredits()
+    private void OpenKeyboard()
     {
-        creditsPanel.SetActive(true);
+        mainCanvasGO.SetActive(false);
+        optionsCanvasGO.SetActive(false);
+        controllerCanvasGO.SetActive(false);
+        keyboardCanvasGO.SetActive(true);
+        creditsCanvasGO.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(keyboardFirst);
+
+
     }
 
-    public void HideCredits()
+    private void OpenCredits()
     {
-        creditsPanel.SetActive(false);
+        mainCanvasGO.SetActive(false);
+        optionsCanvasGO.SetActive(false);
+        creditsCanvasGO.SetActive(true);
+
+        EventSystem.current.SetSelectedGameObject(creditsFirst);
     }
 
+    #endregion
+
+    #region Main Menu Actions
+
+    public void OnOptionsPress()
+    {
+        OpenOptions();
+    }
+
+    public void BackToMain()
+    {
+        OpenMainMenu();
+    }
+
+    public void OnCreditsPress()
+    {
+        OpenCredits();
+    }
+
+    #endregion
+
+    #region Settings Menu Actions
+
+    public void OnControllerPress()
+    {
+        OpenController();
+    }
+
+    public void OnKeyboardPress()
+    {
+        OpenKeyboard();
+    }
+
+    #endregion
+    #region Close Application
     public void QuitGame()
     {
         Application.Quit();
     }
+    #endregion
 
 }
