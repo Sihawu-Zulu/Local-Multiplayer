@@ -13,6 +13,11 @@ public class SceneScript : MonoBehaviour
     [SerializeField] private GameObject mainMenuFirst;
     [SerializeField] private GameObject optionsFirst;
 
+    void Start()
+    {
+        EventSystem.current.SetSelectedGameObject(mainMenuFirst);
+
+    }
     public void SceneSwitch(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
@@ -23,7 +28,6 @@ public class SceneScript : MonoBehaviour
     public void ShowOptions()
     {
         optionsPanel.SetActive(true);
-        EventSystem.current.SetSelectedGameObject(mainMenuFirst);
 
     }
 

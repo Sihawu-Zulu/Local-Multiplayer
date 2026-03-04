@@ -10,6 +10,8 @@ public class MenuManagerScript : MonoBehaviour
     [SerializeField] private GameObject MainCanvasGO;
     [SerializeField] private GameObject menuCanvasGO;
     [SerializeField] private GameObject settingsCanvasGO;
+    [SerializeField] private GameObject controllerCanvasGO;
+    [SerializeField] private GameObject keyboardCanvasGO;
 
     [Header("Scripts Disabled when paused")]
     [SerializeField] private MultiplayerPlayerController player;
@@ -19,7 +21,9 @@ public class MenuManagerScript : MonoBehaviour
     [Header("First Selected Options")]
     [SerializeField] private GameObject menuFirst;
     [SerializeField] private GameObject settingsFirst;
-    [SerializeField] private GameObject returnFirst;
+    [SerializeField] private GameObject controllerFirst;
+    [SerializeField] private GameObject keyboardFirst;
+
 
 
 
@@ -31,6 +35,8 @@ public class MenuManagerScript : MonoBehaviour
         MainCanvasGO.SetActive(true);
         menuCanvasGO.SetActive(false);
         settingsCanvasGO.SetActive(false);
+        controllerCanvasGO.SetActive(false);
+        keyboardCanvasGO.SetActive(false);
 
     }
 
@@ -114,20 +120,47 @@ public class MenuManagerScript : MonoBehaviour
         MainCanvasGO.SetActive(false);
         menuCanvasGO.SetActive(true);
         settingsCanvasGO.SetActive(false);
+        controllerCanvasGO.SetActive(false);
+        keyboardCanvasGO.SetActive(false);
 
         EventSystem.current.SetSelectedGameObject(menuFirst);
 
     }
 
-    private void OpenSettingsMenuHandle()
+    private void OpenSettingsMenu()
     {
-        settingsCanvasGO.SetActive(true);
         MainCanvasGO.SetActive(false);
         menuCanvasGO.SetActive(false);
+        settingsCanvasGO.SetActive(true);
+        controllerCanvasGO.SetActive(false);
+        keyboardCanvasGO.SetActive(false);
 
-        EventSystem.current.SetSelectedGameObject(menuFirst);
-        EventSystem.current.SetSelectedGameObject(returnFirst);
+        EventSystem.current.SetSelectedGameObject(settingsFirst);
 
+
+    }
+
+    private void OpenControllerMenu()
+    {
+        MainCanvasGO.SetActive(false);
+        menuCanvasGO.SetActive(false);
+        settingsCanvasGO.SetActive(false);
+        controllerCanvasGO.SetActive(true);
+        keyboardCanvasGO.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(controllerFirst);
+
+    }
+
+    private void OpenKeyboardMenu()
+    {
+        MainCanvasGO.SetActive(false);
+        menuCanvasGO.SetActive(false);
+        settingsCanvasGO.SetActive(false);
+        controllerCanvasGO.SetActive(false);
+        keyboardCanvasGO.SetActive(true);
+
+        EventSystem.current.SetSelectedGameObject(keyboardFirst);
 
     }
 
@@ -135,17 +168,19 @@ public class MenuManagerScript : MonoBehaviour
     {
         menuCanvasGO.SetActive(false);
         settingsCanvasGO.SetActive(false);
+        controllerCanvasGO.SetActive(false);
+        keyboardCanvasGO.SetActive(false);
 
         EventSystem.current.SetSelectedGameObject(null);
 
     }
     #endregion
 
-    #region Menu Button Actions
+    #region Menu Text Button Actions
 
     public void OnSettingsPress()
     {
-        OpenSettingsMenuHandle();
+        OpenSettingsMenu();
     }
 
     public void OnResumePress()
@@ -157,11 +192,19 @@ public class MenuManagerScript : MonoBehaviour
 
     #region Settings Menu Actions
 
-    public void OnSettingsReturnPress()
+    public void CloseSettingsPress()
     {
         OpenMainMenu();
+    }
 
+    public void OnControllerPress()
+    {
+        OpenControllerMenu();
+    }
 
+    public void OnKeyboardPress()
+    {
+        OpenKeyboardMenu();
     }
 
     #endregion
