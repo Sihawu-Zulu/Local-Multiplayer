@@ -1,48 +1,68 @@
 using UnityEngine;
 
-// i must remember to attach to each player 
 
 
 public class CombatVFX : MonoBehaviour
 {
-    [Header("Hit VFX")]
-    public ParticleSystem lightHitBurst;    
-    public ParticleSystem heavyHitBurst;    
-    public ParticleSystem blockSpark;       
-    [Header("Knockdown VFX")]
-    public ParticleSystem knockdownDust;    
+    private ParticleSystem lightHitBurst;
+    private ParticleSystem heavyHitBurst;
+    private ParticleSystem blockSpark;
+    private ParticleSystem knockdownDust;
+    private ParticleSystem armDetachBurst;
 
-    [Header("Arm Detach VFX")]
-    public ParticleSystem armDetachBurst;   // thread explosion when arm pops off
+    private bool resolved = false;
 
- 
+    
+    private void TryResolve()
+    {
+        if (resolved) return;
+
+        var marker = GetComponentInChildren<CharacterVFXMarker>();
+        if (marker == null) return;
+
+        lightHitBurst   = marker.lightHitBurst;
+        heavyHitBurst   = marker.heavyHitBurst;
+        blockSpark      = marker.blockSpark;
+        knockdownDust   = marker.knockdownDust;
+        armDetachBurst  = marker.armDetachBurst;
+        resolved        = true;
+
+     
+    }
+
+    
+
     public void PlayLightHit(Vector3 worldPos)
     {
+        TryResolve();
         PlayAt(lightHitBurst, worldPos);
     }
 
     public void PlayHeavyHit(Vector3 worldPos)
     {
+        TryResolve();
         PlayAt(heavyHitBurst, worldPos);
     }
 
     public void PlayBlock(Vector3 worldPos)
     {
+        TryResolve();
         PlayAt(blockSpark, worldPos);
     }
 
     public void PlayKnockdownDust()
     {
-        // dust spawns at the players own feet
+        TryResolve();
         PlayAt(knockdownDust, transform.position);
     }
 
     public void PlayArmDetach(Vector3 armWorldPos)
     {
+        TryResolve();
         PlayAt(armDetachBurst, armWorldPos);
     }
 
-   
+
 
     private void PlayAt(ParticleSystem ps, Vector3 pos)
     {
