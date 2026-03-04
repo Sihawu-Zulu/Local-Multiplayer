@@ -9,7 +9,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float jumpForce = 5f;
-    [SerializeField] private float gravity = -18f;
+    [SerializeField] private float gravity   = -18f;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
@@ -17,7 +17,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Character Setup")]
-    [SerializeField] private Transform characterVisualSlot;
+    [SerializeField] private Transform  characterVisualSlot;
     [SerializeField] private GameObject p1CharacterPrefab;
     [SerializeField] private GameObject p2CharacterPrefab;
 
@@ -37,7 +37,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     private bool jumpQueued;
     private Vector3 knockbackVelocity;
 
-    // --- public id ---
+    // ---  ids ---
     public int PlayerID { get; private set; }
 
     public event Action OnLightAttackEvent;
@@ -48,11 +48,15 @@ public class MultiplayerPlayerController : MonoBehaviour
     private bool movementEnabled = false;
     public bool BlockHeld { get; private set; }
 
+    // set at spawn based on which direction this player should naturally face
+    // p1 faces right (+1), p2 faces left (-1) this has been a bitch wtf 
+    private float facingDirection = 1f;
+
     // -------------------------------------------------------
 
     private void Awake()
     {
-        cc = GetComponent<CharacterController>();
+        cc  = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
     }
 
@@ -61,7 +65,7 @@ public class MultiplayerPlayerController : MonoBehaviour
         if (playerInput != null)
             PlayerID = playerInput.playerIndex + 1;
 
-        Debug.Log($"[P{PlayerID}] OnEnable... PlayerID confirmed");
+       
     }
 
     private void Start()
@@ -89,16 +93,17 @@ public class MultiplayerPlayerController : MonoBehaviour
     }
 
     // -------------------------------------------------------
-    // spawn
+    // spawn stuffff
     // -------------------------------------------------------
 
     private void MoveToSpawnPoint()
     {
+        facingDirection = PlayerID == 1 ? 1f : -1f;
         Transform sp = PlayerID == 1 ? p1SpawnPoint : p2SpawnPoint;
 
         if (sp == null)
         {
-            Debug.LogWarning($"[P{PlayerID}] no spawn point assigned");
+           
             return;
         }
 
@@ -116,13 +121,18 @@ public class MultiplayerPlayerController : MonoBehaviour
             return;
 
         Instantiate(prefab, characterVisualSlot.position, characterVisualSlot.rotation, characterVisualSlot);
-        Debug.Log($"[P{PlayerID}] spawned: {prefab.name}");
+
+        // p2 model is  facing the same direction as p1.... flip x scale so they face each other
+        if (PlayerID == 2)
+        {
+            Vector3 s = characterVisualSlot.localScale;
+            characterVisualSlot.localScale = new Vector3(-Mathf.Abs(s.x), s.y, s.z);
+        }
+
+       
     }
 
-    // -------------------------------------------------------
-    // input callbacks
-    // -------------------------------------------------------
-
+  ///input callbacks
     public void OnMove(InputAction.CallbackContext ctx)
     {
         moveInput = ctx.ReadValue<Vector2>();
@@ -137,7 +147,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     {
         if (ctx.started)
         {
-            Debug.Log($"[P{PlayerID}] OnLightAttack pressed");
+         
             OnLightAttackEvent?.Invoke();
         }
     }
@@ -146,14 +156,14 @@ public class MultiplayerPlayerController : MonoBehaviour
     {
         if (ctx.started)
         {
-            Debug.Log($"[P{PlayerID}] OnHeavyAttack pressed");
+           
             OnHeavyAttackEvent?.Invoke();
         }
     }
 
     public void OnBlock(InputAction.CallbackContext ctx)
     {
-        if (ctx.started) BlockHeld = true;
+        if (ctx.started)  BlockHeld = true;
         if (ctx.canceled) BlockHeld = false;
     }
 
@@ -163,7 +173,7 @@ public class MultiplayerPlayerController : MonoBehaviour
             OnReactionEvent?.Invoke();
     }
 
-    // north button — mash while downed to get back up
+    
     public void OnGetUp(InputAction.CallbackContext ctx)
     {
         if (ctx.started)
@@ -175,10 +185,10 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     // voodoo physics layer reads these each frame
     public Vector3 GetMoveDirection() => new Vector3(moveInput.x, 0f, 0f).normalized;
-    public bool IsGrounded => isGrounded;
+    public bool    IsGrounded => isGrounded;
 
     // -------------------------------------------------------
-    // movement
+    // movementt
     // -------------------------------------------------------
 
     private void CheckGround()
@@ -202,7 +212,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     {
         if (!jumpQueued) return;
         verticalVelocity = jumpForce;
-        jumpQueued = false;
+        jumpQueued       = false;
     }
 
     private void MoveCharacter()
@@ -215,6 +225,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         if (horizontal.x != 0f && characterVisualSlot != null)
         {
+            // face whichever direction the player is moving....same for both players
             characterVisualSlot.localScale = new Vector3(
                 Mathf.Sign(horizontal.x) * Mathf.Abs(characterVisualSlot.localScale.x),
                 characterVisualSlot.localScale.y,
@@ -225,7 +236,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     // -------------------------------------------------------
     // knockback
-    // -------------------------------------------------------
+    
 
     public void ApplyKnockback(Vector3 force)
     {
@@ -240,9 +251,7 @@ public class MultiplayerPlayerController : MonoBehaviour
                                                 knockbackDecay * Time.deltaTime);
     }
 
-    // -------------------------------------------------------
-    // enable / disable
-    // -------------------------------------------------------
+  
 
     public void SetMovementEnabled(bool enabled)
     {
@@ -250,15 +259,15 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         if (!enabled)
         {
-            moveInput = Vector2.zero;
+            moveInput        = Vector2.zero;
             verticalVelocity = 0f;
-            jumpQueued = false;
+            jumpQueued       = false;
         }
     }
 
     // -------------------------------------------------------
     // gizmos
-    // -------------------------------------------------------
+    
 
     private void OnDrawGizmosSelected()
     {
