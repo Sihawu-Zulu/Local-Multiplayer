@@ -403,9 +403,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatSystem
   lightAttackDamage: 5
   heavyAttackDamage: 8
-  blockDamageReduction: 0.5
-  lightAttackCooldown: 0.4
-  heavyAttackCooldown: 0.8
+  blockDamageReduction: 1
+  lightAttackCooldown: 0
+  heavyAttackCooldown: 3
   attackRange: 2
   lightKnockbackForce: 2
   heavyKnockbackForce: 3

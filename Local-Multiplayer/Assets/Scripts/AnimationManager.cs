@@ -12,6 +12,7 @@ public class AnimationManager : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
+        PlayIdle();
     }
 
 

@@ -100,20 +100,30 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         ApplyKnockbackDecay();
 
+        //Animation------------------------------------
+
+        CombatSystem combat = GetComponent<CombatSystem>();
+
+        if (combat != null && combat.IsAttacking)
+        {
+            return; // ensures attack animations wont override
+        }
+
         if (!isGrounded)
         {
             animationScript.PlayJump();
         }
-        else
-        {
-            //animationScript.PlayIdle();
-        }
-
-        if (moveInput.x > 0 || moveInput.y > 0)
+        else if (Mathf.Abs(moveInput.x) > 0.1f)
         {
             animationScript.PlayRun();
 
         }
+        else
+        {
+            animationScript.PlayIdle();
+
+        }
+
 
     }
 

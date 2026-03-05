@@ -126,24 +126,34 @@ public class CombatSystem : MonoBehaviour
 
     private void HandleLightAttack()
     {
-        animationScript.PlayLightAttack();
         if (!combatEnabled || !opponentLinked) return;
         if (!canLight || IsBlocking) return;
+
+        IsAttacking = true;
+
         StartCoroutine(PerformAttack(lightAttackDamage, lightKnockbackForce,
                                      lightAttackCooldown, lightHitStopDuration,
                                      lightShakeMagnitude, "LIGHT"));
+
+        animationScript.PlayLightAttack();
+
 
 
     }
 
     private void HandleHeavyAttack()
     {
-        animationScript.PlayHeavyAttack();
         if (!combatEnabled || !opponentLinked) return;
         if (!canHeavy || IsBlocking || !heavyEnabled) return;
+
+        IsAttacking = true;
+
         StartCoroutine(PerformAttack(heavyAttackDamage, heavyKnockbackForce,
                                      heavyAttackCooldown, heavyHitStopDuration,
                                      heavyShakeMagnitude, "HEAVY"));
+
+        animationScript.PlayHeavyAttack();
+
 
 
 
@@ -152,7 +162,7 @@ public class CombatSystem : MonoBehaviour
     private IEnumerator PerformAttack(float damage, float knockbackForce, float cooldown,
                                       float hitStopDur, float shakeMag, string type)
     {
-        IsAttacking = true;
+        //IsAttacking = true;
         if (type == "LIGHT") canLight = false;
         else canHeavy = false;
 
@@ -208,6 +218,9 @@ public class CombatSystem : MonoBehaviour
 
         yield return new WaitForSeconds(0.1f);
         IsAttacking = false;
+
+        animationScript.PlayIdle();
+
         yield return new WaitForSeconds(cooldown - 0.1f);
 
         if (type == "LIGHT") canLight = true;
