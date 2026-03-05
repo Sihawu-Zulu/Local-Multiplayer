@@ -4,8 +4,8 @@ using UnityEngine;
 public class CombatSystem : MonoBehaviour
 {
     [Header("Damage Values")]
-    [SerializeField] private float lightAttackDamage    = 10f;
-    [SerializeField] private float heavyAttackDamage    = 20f;
+    [SerializeField] private float lightAttackDamage = 10f;
+    [SerializeField] private float heavyAttackDamage = 20f;
     [SerializeField] private float blockDamageReduction = 0.5f;
 
     [Header("Cooldowns")]
@@ -16,47 +16,54 @@ public class CombatSystem : MonoBehaviour
     [SerializeField] private float attackRange = 4.5f;
 
     [Header("Knockback")]
-    [SerializeField] private float lightKnockbackForce  = 4f;
-    [SerializeField] private float heavyKnockbackForce  = 8f;
-    [SerializeField] private float knockbackUpAngle     = 0.2f;
+    [SerializeField] private float lightKnockbackForce = 4f;
+    [SerializeField] private float heavyKnockbackForce = 8f;
+    [SerializeField] private float knockbackUpAngle = 0.2f;
     [SerializeField] private float blockedKnockbackMult = 0.4f;
 
     [Header("Juice Settings")]
     [SerializeField] private float lightHitStopDuration = 0.04f;
     [SerializeField] private float heavyHitStopDuration = 0.09f;
-    [SerializeField] private float lightShakeMagnitude  = 0.05f;
-    [SerializeField] private float heavyShakeMagnitude  = 0.13f;
-    [SerializeField] private float shakeDuration        = 0.15f;
+    [SerializeField] private float lightShakeMagnitude = 0.05f;
+    [SerializeField] private float heavyShakeMagnitude = 0.13f;
+    [SerializeField] private float shakeDuration = 0.15f;
+
+
 
     // --- resolved at start / update ---
-    private PlayerHealth                 myHealth;
-    private PlayerHealth                 opponentHealth;
-    private CombatSystem                 opponentCombat;
-    private MultiplayerPlayerController  opponentController;
-    private CombatVFX                    myVFX;           // vfx on this player
-    private CombatVFX                    opponentVFX;     // vfx on the opponent — hits spawn there
+    private PlayerHealth myHealth;
+    private PlayerHealth opponentHealth;
+    private CombatSystem opponentCombat;
+    private MultiplayerPlayerController opponentController;
+    private CombatVFX myVFX;           // vfx on this player
+    private CombatVFX opponentVFX;     // vfx on the opponent — hits spawn there
     private bool opponentLinked = false;
 
     // --- state ---
-    public  bool IsBlocking   { get; private set; }
-    public  bool IsAttacking  { get; private set; }
-    private bool canLight      = true;
-    private bool canHeavy      = true;
+    public bool IsBlocking { get; private set; }
+    public bool IsAttacking { get; private set; }
+    private bool canLight = true;
+    private bool canHeavy = true;
     private bool combatEnabled = true;
-    private bool heavyEnabled  = true;   // off when arm detaches
+    private bool heavyEnabled = true;   // off when arm detaches
 
     private MultiplayerPlayerController controller;
+
+    //AnimationHandler
+    private MultiplayerPlayerController MultiplayerScript;
+    [SerializeField]
+    AnimationManager animationScript;
 
     // -------------------------------------------------------
 
     private void Awake()
     {
         controller = GetComponent<MultiplayerPlayerController>();
-        myHealth   = GetComponent<PlayerHealth>();
-        myVFX      = GetComponent<CombatVFX>();
+        myHealth = GetComponent<PlayerHealth>();
+        myVFX = GetComponent<CombatVFX>();
 
         if (controller == null) Debug.LogError("[CombatSystem] " + gameObject.name + " no controller");
-        if (myHealth   == null) Debug.LogError("[CombatSystem] " + gameObject.name + " no health");
+        if (myHealth == null) Debug.LogError("[CombatSystem] " + gameObject.name + " no health");
     }
 
     private void Start()
@@ -64,6 +71,8 @@ public class CombatSystem : MonoBehaviour
         controller.OnLightAttackEvent += HandleLightAttack;
         controller.OnHeavyAttackEvent += HandleHeavyAttack;
         TryFindOpponent();
+        MultiplayerScript = GetComponent<MultiplayerPlayerController>();
+        animationScript = MultiplayerScript.animationScript;
     }
 
     private void OnDestroy()
@@ -92,11 +101,11 @@ public class CombatSystem : MonoBehaviour
         foreach (var other in allCombat)
         {
             if (other == this) continue;
-            opponentHealth     = other.GetComponent<PlayerHealth>();
-            opponentCombat     = other;
+            opponentHealth = other.GetComponent<PlayerHealth>();
+            opponentCombat = other;
             opponentController = other.GetComponent<MultiplayerPlayerController>();
-            opponentVFX        = other.GetComponent<CombatVFX>();
-            opponentLinked     = true;
+            opponentVFX = other.GetComponent<CombatVFX>();
+            opponentLinked = true;
             Debug.Log("[P" + controller.PlayerID + " CombatSystem] opponent linked");
             break;
         }
@@ -117,20 +126,27 @@ public class CombatSystem : MonoBehaviour
 
     private void HandleLightAttack()
     {
+        animationScript.PlayLightAttack();
         if (!combatEnabled || !opponentLinked) return;
         if (!canLight || IsBlocking) return;
         StartCoroutine(PerformAttack(lightAttackDamage, lightKnockbackForce,
                                      lightAttackCooldown, lightHitStopDuration,
                                      lightShakeMagnitude, "LIGHT"));
+
+
     }
 
     private void HandleHeavyAttack()
     {
+        animationScript.PlayHeavyAttack();
         if (!combatEnabled || !opponentLinked) return;
         if (!canHeavy || IsBlocking || !heavyEnabled) return;
         StartCoroutine(PerformAttack(heavyAttackDamage, heavyKnockbackForce,
                                      heavyAttackCooldown, heavyHitStopDuration,
                                      heavyShakeMagnitude, "HEAVY"));
+
+
+
     }
 
     private IEnumerator PerformAttack(float damage, float knockbackForce, float cooldown,
@@ -138,7 +154,7 @@ public class CombatSystem : MonoBehaviour
     {
         IsAttacking = true;
         if (type == "LIGHT") canLight = false;
-        else                  canHeavy = false;
+        else canHeavy = false;
 
         Debug.Log("[P" + controller.PlayerID + "] " + type + " ATTACK");
 
@@ -146,15 +162,15 @@ public class CombatSystem : MonoBehaviour
 
         if (dist <= attackRange)
         {
-            bool  isBlocked      = opponentCombat != null && opponentCombat.IsBlocking;
-            float finalDamage    = isBlocked ? damage * (1f - blockDamageReduction) : damage;
+            bool isBlocked = opponentCombat != null && opponentCombat.IsBlocking;
+            float finalDamage = isBlocked ? damage * (1f - blockDamageReduction) : damage;
             float finalKnockback = isBlocked ? knockbackForce * blockedKnockbackMult : knockbackForce;
 
             opponentHealth.TakeDamage(finalDamage);
 
             Vector3 diff = opponentHealth.transform.position - transform.position;
             diff.y = 0f;
-            Vector3 dir          = diff.magnitude > 0.01f ? diff.normalized : (transform.right * (controller.PlayerID == 1 ? 1f : -1f));
+            Vector3 dir = diff.magnitude > 0.01f ? diff.normalized : (transform.right * (controller.PlayerID == 1 ? 1f : -1f));
             Vector3 knockbackDir = (dir + Vector3.up * knockbackUpAngle).normalized;
             opponentController?.ApplyKnockback(knockbackDir * finalKnockback);
 
@@ -170,7 +186,7 @@ public class CombatSystem : MonoBehaviour
 
                 // vfx burst on the opponent
                 if (type == "LIGHT") opponentVFX?.PlayLightHit(impactPos);
-                else                   opponentVFX?.PlayHeavyHit(impactPos);
+                else opponentVFX?.PlayHeavyHit(impactPos);
 
                 // hitstop + shake - heavy hits feel meatier
                 HitStop.Instance?.Freeze(hitStopDur);
@@ -195,7 +211,7 @@ public class CombatSystem : MonoBehaviour
         yield return new WaitForSeconds(cooldown - 0.1f);
 
         if (type == "LIGHT") canLight = true;
-        else                  canHeavy = true;
+        else canHeavy = true;
     }
 
     // -------------------------------------------------------
@@ -208,10 +224,10 @@ public class CombatSystem : MonoBehaviour
         if (!enabled)
         {
             StopAllCoroutines();
-            IsBlocking  = false;
+            IsBlocking = false;
             IsAttacking = false;
-            canLight    = true;
-            canHeavy    = true;
+            canLight = true;
+            canHeavy = true;
         }
     }
 

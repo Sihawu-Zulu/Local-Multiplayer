@@ -11,46 +11,49 @@ using UnityEngine.Events;
 public class KnockdownManager : MonoBehaviour
 {
     [Header("Recovery Settings")]
-    [SerializeField] private int   mashesRequired    = 15;
+    [SerializeField] private int mashesRequired = 15;
     [SerializeField] private float recoveryTimeLimit = 6f;
 
     [Header("Tug Of War Settings")]
-    [SerializeField] private float tugDamagePerSecond   = 5f;
+    [SerializeField] private float tugDamagePerSecond = 5f;
     [SerializeField] private float tugProgressPerSecond = 0.15f;
-    [SerializeField] private float tugDecayPerSecond    = 0.08f;
+    [SerializeField] private float tugDecayPerSecond = 0.08f;
 
     [Header("Arm Settings")]
     [SerializeField] private Vector3 armDetachedOffset = new Vector3(0.5f, -0.3f, 0f);
 
     [Header("Juice Settings")]
     [SerializeField] private float knockdownShakeMagnitude = 0.2f;
-    [SerializeField] private float knockdownShakeDuration  = 0.25f;
+    [SerializeField] private float knockdownShakeDuration = 0.25f;
     [SerializeField] private float armDetachShakeMagnitude = 0.35f;
-    [SerializeField] private float armDetachShakeDuration  = 0.3f;
-    [SerializeField] private float armDetachHitStopDur     = 0.12f;
+    [SerializeField] private float armDetachShakeDuration = 0.3f;
+    [SerializeField] private float armDetachHitStopDur = 0.12f;
 
     [Header("Knockback / Fall Settings")]
-    [SerializeField] private float knockbackForce    = 12f;   // how hard the loser gets pushed on knockdown
+    [SerializeField] private float knockbackForce = 12f;   // how hard the loser gets pushed on knockdown
     [SerializeField] private float fallRotateDuration = 0.25f; // how long it takes to rotate flat
-    [SerializeField] private float fallRotateAngle   = 90f;   // z rotation when flat on the floor
+    [SerializeField] private float fallRotateAngle = 90f;   // z rotation when flat on the floor
 
     [Header("Roll / Tumble Settings")]
-    [SerializeField] private float rollDuration      = 0.18f;  // how long each roll takes
-    [SerializeField] private float rollAngle         = 360f;   // full spin per mash
-    [SerializeField] private float rollMoveDistance  = 0.4f;   // how far they slide per roll
+    [SerializeField] private float rollDuration = 0.18f;  // how long each roll takes
+    [SerializeField] private float rollAngle = 360f;   // full spin per mash
+    [SerializeField] private float rollMoveDistance = 0.4f;   // how far they slide per roll
+
+    [Header("Animator")]
+    private Animator animator;
 
     // --- runtime resolved ---
-    private Transform      p1ArmTransform;
-    private Transform      p2ArmTransform;
+    private Transform p1ArmTransform;
+    private Transform p2ArmTransform;
     private ParticleSystem p1StringTrail;
     private ParticleSystem p2StringTrail;
 
     // --- events ---
-    public UnityEvent<int>   OnKnockdownStarted;
-    public UnityEvent<int>   OnPlayerRecovered;
-    public UnityEvent<int>   OnArmDetached;
+    public UnityEvent<int> OnKnockdownStarted;
+    public UnityEvent<int> OnPlayerRecovered;
+    public UnityEvent<int> OnArmDetached;
     public UnityEvent<float> OnTugProgressChanged;
-    public UnityEvent<int>   OnMashProgress;
+    public UnityEvent<int> OnMashProgress;
 
     // --- refs ---
     private MultiplayerPlayerController p1Controller;
@@ -61,22 +64,22 @@ public class KnockdownManager : MonoBehaviour
     private CombatSystem p2Combat;
     private VoodooPhysicsLayer p1Physics;
     private VoodooPhysicsLayer p2Physics;
-    private CombatVFX          p1VFX;
-    private CombatVFX          p2VFX;
+    private CombatVFX p1VFX;
+    private CombatVFX p2VFX;
     private bool playersResolved = false;
 
     // --- state ---
     public KnockdownState CurrentState { get; private set; } = KnockdownState.None;
 
-    private int   downedPlayerID   = 0;
-    private int   attackerPlayerID = 0;
-    private int   mashCount        = 0;
-    private float tugProgress      = 0f;
-    private float recoveryTimer    = 0f;
-    private bool  p1ArmGone        = false;
-    private bool  p2ArmGone        = false;
-    private bool  p1GetUpPressed   = false;
-    private bool  p2GetUpPressed   = false;
+    private int downedPlayerID = 0;
+    private int attackerPlayerID = 0;
+    private int mashCount = 0;
+    private float tugProgress = 0f;
+    private float recoveryTimer = 0f;
+    private bool p1ArmGone = false;
+    private bool p2ArmGone = false;
+    private bool p1GetUpPressed = false;
+    private bool p2GetUpPressed = false;
 
     private Coroutine rollCoroutine = null;
 
@@ -144,14 +147,14 @@ public class KnockdownManager : MonoBehaviour
     {
         if (CurrentState != KnockdownState.None) return;
 
-        downedPlayerID   = downedID;
+        downedPlayerID = downedID;
         attackerPlayerID = downedID == 1 ? 2 : 1;
-        mashCount        = 0;
-        tugProgress      = 0f;
-        recoveryTimer    = 0f;
-        CurrentState     = KnockdownState.Downed;
-        p1GetUpPressed   = false;
-        p2GetUpPressed   = false;
+        mashCount = 0;
+        tugProgress = 0f;
+        recoveryTimer = 0f;
+        CurrentState = KnockdownState.Downed;
+        p1GetUpPressed = false;
+        p2GetUpPressed = false;
 
         GetController(downedPlayerID)?.SetMovementEnabled(false);
         GetCombat(downedPlayerID)?.SetCombatEnabled(false);
@@ -170,6 +173,8 @@ public class KnockdownManager : MonoBehaviour
 
         OnKnockdownStarted?.Invoke(downedID);
         Debug.Log($"[Knockdown] P{downedID} is downed — mash to get up!");
+
+        animator.SetBool("Knowdown", true);
     }
 
     // -------------------------------------------------------
@@ -178,7 +183,7 @@ public class KnockdownManager : MonoBehaviour
 
     private void ApplyKnockdownKnockback(int downedID)
     {
-        var downedCtrl   = GetController(downedID);
+        var downedCtrl = GetController(downedID);
         var attackerCtrl = GetController(downedID == 1 ? 2 : 1);
         if (downedCtrl == null || attackerCtrl == null) return;
 
@@ -202,7 +207,7 @@ public class KnockdownManager : MonoBehaviour
 
         Quaternion startRot = visual.localRotation;
         // fall in a random left/right direction for variety
-        float dir    = Random.value > 0.5f ? 1f : -1f;
+        float dir = Random.value > 0.5f ? 1f : -1f;
         Quaternion endRot = Quaternion.Euler(0f, 0f, fallRotateAngle * dir);
 
         float elapsed = 0f;
@@ -225,7 +230,7 @@ public class KnockdownManager : MonoBehaviour
         bool pressed = downedPlayerID == 1 ? p1GetUpPressed : p2GetUpPressed;
 
         if (downedPlayerID == 1) p1GetUpPressed = false;
-        else                     p2GetUpPressed = false;
+        else p2GetUpPressed = false;
 
         if (!pressed) return;
 
@@ -264,16 +269,16 @@ public class KnockdownManager : MonoBehaviour
         Transform visual = ctrl.GetVisualSlot();
         if (visual == null) yield break;
 
-        float dir         = Random.value > 0.5f ? 1f : -1f;
-        Quaternion startRot   = visual.localRotation;
-        Vector3    startPos   = visual.localPosition;
-        Vector3    targetPos  = startPos + new Vector3(dir * rollMoveDistance, 0f, 0f);
+        float dir = Random.value > 0.5f ? 1f : -1f;
+        Quaternion startRot = visual.localRotation;
+        Vector3 startPos = visual.localPosition;
+        Vector3 targetPos = startPos + new Vector3(dir * rollMoveDistance, 0f, 0f);
 
         float elapsed = 0f;
         while (elapsed < rollDuration)
         {
             elapsed += Time.deltaTime;
-            float t  = elapsed / rollDuration;
+            float t = elapsed / rollDuration;
 
             // spin adds on top of whatever the current flat rotation is
             visual.localRotation = startRot * Quaternion.Euler(0f, 0f, rollAngle * dir * t);
@@ -358,6 +363,9 @@ public class KnockdownManager : MonoBehaviour
             Debug.Log($"[Knockdown] P{downedPlayerID} recovered!");
             CurrentState = KnockdownState.None;
         }));
+
+        animator.SetBool("Knockdown", false);
+        animator.SetTrigger("GetUp");
     }
 
     // tweens the visual back upright before re-enabling control
@@ -370,14 +378,14 @@ public class KnockdownManager : MonoBehaviour
         if (visual == null) { onComplete?.Invoke(); yield break; }
 
         Quaternion startRot = visual.localRotation;
-        Quaternion endRot   = Quaternion.identity;
-        Vector3    startPos = visual.localPosition;
+        Quaternion endRot = Quaternion.identity;
+        Vector3 startPos = visual.localPosition;
 
         float elapsed = 0f;
         while (elapsed < fallRotateDuration)
         {
             elapsed += Time.deltaTime;
-            float t  = elapsed / fallRotateDuration;
+            float t = elapsed / fallRotateDuration;
             visual.localRotation = Quaternion.Lerp(startRot, endRot, t);
             visual.localPosition = Vector3.Lerp(startPos, Vector3.zero, t);
             yield return null;
@@ -401,7 +409,7 @@ public class KnockdownManager : MonoBehaviour
             armTransform.localPosition = armDetachedOffset;
 
         if (downedPlayerID == 1) p1ArmGone = true;
-        else                     p2ArmGone = true;
+        else p2ArmGone = true;
 
         GetCombat(downedPlayerID)?.SetHeavyAttackEnabled(false);
 
@@ -450,14 +458,14 @@ public class KnockdownManager : MonoBehaviour
 
     public void ResetKnockdown()
     {
-        CurrentState     = KnockdownState.None;
-        downedPlayerID   = 0;
+        CurrentState = KnockdownState.None;
+        downedPlayerID = 0;
         attackerPlayerID = 0;
-        mashCount        = 0;
-        tugProgress      = 0f;
-        recoveryTimer    = 0f;
-        p1ArmGone        = false;
-        p2ArmGone        = false;
+        mashCount = 0;
+        tugProgress = 0f;
+        recoveryTimer = 0f;
+        p1ArmGone = false;
+        p2ArmGone = false;
 
         StopStringTrails();
         p1Combat?.SetHeavyAttackEnabled(true);
@@ -497,8 +505,8 @@ public class KnockdownManager : MonoBehaviour
 
 
     private MultiplayerPlayerController GetController(int id) => id == 1 ? p1Controller : p2Controller;
-    private PlayerHealth                GetHealth(int id)     => id == 1 ? p1Health      : p2Health;
-    private CombatSystem                GetCombat(int id)     => id == 1 ? p1Combat       : p2Combat;
-    private VoodooPhysicsLayer          GetPhysics(int id)    => id == 1 ? p1Physics      : p2Physics;
-    private CombatVFX                   GetVFX(int id)        => id == 1 ? p1VFX           : p2VFX;
-} 
+    private PlayerHealth GetHealth(int id) => id == 1 ? p1Health : p2Health;
+    private CombatSystem GetCombat(int id) => id == 1 ? p1Combat : p2Combat;
+    private VoodooPhysicsLayer GetPhysics(int id) => id == 1 ? p1Physics : p2Physics;
+    private CombatVFX GetVFX(int id) => id == 1 ? p1VFX : p2VFX;
+}
