@@ -404,11 +404,11 @@ MonoBehaviour:
   lightAttackDamage: 5
   heavyAttackDamage: 8
   blockDamageReduction: 1
-  lightAttackCooldown: 0
+  lightAttackCooldown: 1.5
   heavyAttackCooldown: 3
   attackRange: 2
-  lightKnockbackForce: 2
-  heavyKnockbackForce: 3
+  lightKnockbackForce: 3
+  heavyKnockbackForce: 4
   knockbackUpAngle: 0.2
   blockedKnockbackMult: 0.4
   lightHitStopDuration: 0.04

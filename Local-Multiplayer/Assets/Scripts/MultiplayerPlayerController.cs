@@ -40,6 +40,8 @@ public class MultiplayerPlayerController : MonoBehaviour
     private bool jumpQueued;
     private Vector3 knockbackVelocity;
 
+    private PlayerHealth playerHealth;
+
     // ---  ids ---
     public int PlayerID { get; private set; }
     public AnimationManager animationScript;
@@ -62,6 +64,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     {
         cc = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
+        playerHealth = GetComponent<PlayerHealth>();
     }
 
     private void OnEnable()
@@ -107,6 +110,11 @@ public class MultiplayerPlayerController : MonoBehaviour
         if (combat != null && combat.IsAttacking)
         {
             return; // ensures attack animations wont override
+        }
+
+        if (playerHealth != null && playerHealth.IsReacting)
+        {
+            return;
         }
 
         if (!isGrounded)

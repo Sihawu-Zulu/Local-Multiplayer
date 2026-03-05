@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,8 +12,9 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private float maxHealth = 100f;
     [SerializeField] private float killerShotThreshold = 30f;   // % hp at which killer shot triggers
 
-    [Header("Animation")]
-    private Animator animator;
+    [Header("Animation stuff")]
+    public bool IsReacting
+    { get; private set; }
 
     [Header("Debug / Live View")]
     [SerializeField, Range(0f, 100f)] private float currentHealth;
@@ -48,11 +50,17 @@ public class PlayerHealth : MonoBehaviour
     {
         if (IsDefeated) return;
 
+        IsReacting = true; // starts reacting
+
         currentHealth = Mathf.Max(0f, currentHealth - amount);
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
-        float pct = (currentHealth / maxHealth) * 100f;
         MultiplayerScript.animationScript.PlayTakeDamage();
+
+        float animLength = 0.5f;
+        MultiplayerScript.StartCoroutine(ResetReacting(animLength));
+
+        float pct = (currentHealth / maxHealth) * 100f;
 
         // trigger killer shot phase once hp drops low enough — only fires once per life
         if (!KillerShotReady && pct <= killerShotThreshold)
@@ -68,6 +76,13 @@ public class PlayerHealth : MonoBehaviour
             OnPlayerDefeated?.Invoke();
             Debug.Log($"[{gameObject.name}] defeated");
         }
+
+    }
+
+    private IEnumerator ResetReacting(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        IsReacting = false;
 
     }
 
