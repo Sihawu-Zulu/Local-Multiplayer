@@ -52,6 +52,21 @@ public class AnimationManager : MonoBehaviour
         animator.SetBool(AnimationBools[3], true);
     }
 
+    public void PlayKnockdown()
+    {
+        animator.SetBool("Knowdown", true);
+    }
+
+    // public void PlayKnockdownRoll()
+    // {
+    //     animator.SetBool("KnockdownRoll", true);
+    // }
+
+    public void PlayGetup()
+    {
+        animator.SetBool("Knockdown", false);
+    }
+
     public void PlayLightAttack()
     {
         for (int i = 0; i < AnimationBools.Count; i++)

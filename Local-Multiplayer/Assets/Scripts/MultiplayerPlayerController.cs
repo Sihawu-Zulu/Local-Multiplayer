@@ -41,6 +41,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     private Vector3 knockbackVelocity;
 
     private PlayerHealth playerHealth;
+    private KnockdownManager knockdownManager;
 
     // ---  ids ---
     public int PlayerID { get; private set; }
@@ -65,6 +66,7 @@ public class MultiplayerPlayerController : MonoBehaviour
         cc = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
         playerHealth = GetComponent<PlayerHealth>();
+        knockdownManager = GetComponent<KnockdownManager>();
     }
 
     private void OnEnable()
@@ -104,6 +106,7 @@ public class MultiplayerPlayerController : MonoBehaviour
         ApplyKnockbackDecay();
 
         //Animation------------------------------------
+
 
         CombatSystem combat = GetComponent<CombatSystem>();
 

@@ -39,7 +39,7 @@ public class KnockdownManager : MonoBehaviour
     [SerializeField] private float rollAngle = 360f;   // full spin per mash
     [SerializeField] private float rollMoveDistance = 0.4f;   // how far they slide per roll
 
-    [Header("Animator")]
+    [Header("Animation stuff")]
     private Animator animator;
 
     // --- runtime resolved ---
