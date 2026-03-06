@@ -40,7 +40,7 @@ public class KnockdownManager : MonoBehaviour
     [SerializeField] private float rollMoveDistance = 0.4f;   // how far they slide per roll
 
     [Header("Animation stuff")]
-    private Animator animator;
+    private AnimationManager animatorScript;
 
     // --- runtime resolved ---
     private Transform p1ArmTransform;
@@ -162,6 +162,7 @@ public class KnockdownManager : MonoBehaviour
 
         // push the downed player away from the attacker then tip them flat
         ApplyKnockdownKnockback(downedID);
+        //animatorScript.PlayKnockdown();
         StartCoroutine(FallFlat(downedID));
 
         // juice on knockdown
@@ -174,7 +175,6 @@ public class KnockdownManager : MonoBehaviour
         OnKnockdownStarted?.Invoke(downedID);
         Debug.Log($"[Knockdown] P{downedID} is downed — mash to get up!");
 
-        animator.SetBool("Knowdown", true);
     }
 
     // -------------------------------------------------------
@@ -204,6 +204,7 @@ public class KnockdownManager : MonoBehaviour
 
         Transform visual = ctrl.GetVisualSlot();
         if (visual == null) yield break;
+
 
         Quaternion startRot = visual.localRotation;
         // fall in a random left/right direction for variety
@@ -364,8 +365,6 @@ public class KnockdownManager : MonoBehaviour
             CurrentState = KnockdownState.None;
         }));
 
-        animator.SetBool("Knockdown", false);
-        animator.SetTrigger("GetUp");
     }
 
     // tweens the visual back upright before re-enabling control
