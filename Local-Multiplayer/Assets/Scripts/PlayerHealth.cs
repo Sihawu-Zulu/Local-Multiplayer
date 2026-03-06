@@ -49,6 +49,14 @@ public class PlayerHealth : MonoBehaviour
     public void TakeDamage(float amount)
     {
         if (IsDefeated) return;
+        StartCoroutine(HealthUpdateDelay(amount));
+
+    }
+
+    private IEnumerator HealthUpdateDelay(float amount)
+    {
+        yield return new WaitForSeconds(1f);
+
 
         IsReacting = true; // starts reacting
 
@@ -57,8 +65,8 @@ public class PlayerHealth : MonoBehaviour
 
         MultiplayerScript.animationScript.PlayTakeDamage();
 
-        float animLength = 0.5f;
-        MultiplayerScript.StartCoroutine(ResetReacting(animLength));
+        //float animLength = 0f;
+        MultiplayerScript.StartCoroutine(ResetReacting());
 
         float pct = (currentHealth / maxHealth) * 100f;
 
@@ -77,11 +85,12 @@ public class PlayerHealth : MonoBehaviour
             Debug.Log($"[{gameObject.name}] defeated");
         }
 
+
     }
 
-    private IEnumerator ResetReacting(float delay)
+    private IEnumerator ResetReacting()
     {
-        yield return new WaitForSeconds(delay);
+        yield return new WaitForSeconds(0f);
         IsReacting = false;
 
     }
