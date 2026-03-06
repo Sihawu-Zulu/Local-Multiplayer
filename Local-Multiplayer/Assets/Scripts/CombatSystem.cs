@@ -28,6 +28,9 @@ public class CombatSystem : MonoBehaviour
     [SerializeField] private float heavyShakeMagnitude = 0.13f;
     [SerializeField] private float shakeDuration = 0.15f;
 
+    [Header("Player Separation")]
+    [SerializeField] private float minSeparationDistance = 1.2f;    // closer than this = push apart
+    [SerializeField] private float separationForce = 6f;            // how hard the push is
 
 
     // --- resolved at start / update ---
@@ -35,8 +38,8 @@ public class CombatSystem : MonoBehaviour
     private PlayerHealth opponentHealth;
     private CombatSystem opponentCombat;
     private MultiplayerPlayerController opponentController;
-    private CombatVFX myVFX;           // vfx on this player
-    private CombatVFX opponentVFX;     // vfx on the opponent — hits spawn there
+    private CombatVFX myVFX;
+    private CombatVFX opponentVFX;
     private bool opponentLinked = false;
 
     // --- state ---
@@ -45,14 +48,12 @@ public class CombatSystem : MonoBehaviour
     private bool canLight = true;
     private bool canHeavy = true;
     private bool combatEnabled = true;
-    private bool heavyEnabled = true;   // off when arm detaches
+    private bool heavyEnabled = true;
 
     private MultiplayerPlayerController controller;
 
-    //AnimationHandler
     private MultiplayerPlayerController MultiplayerScript;
-    [SerializeField]
-    AnimationManager animationScript;
+    [SerializeField] AnimationManager animationScript;
 
     // -------------------------------------------------------
 
@@ -63,7 +64,7 @@ public class CombatSystem : MonoBehaviour
         myVFX = GetComponent<CombatVFX>();
 
         if (controller == null) Debug.LogError("[CombatSystem] " + gameObject.name + " no controller");
-        if (myHealth == null) Debug.LogError("[CombatSystem] " + gameObject.name + " no health");
+        if (myHealth == null)   Debug.LogError("[CombatSystem] " + gameObject.name + " no health");
     }
 
     private void Start()
@@ -72,7 +73,7 @@ public class CombatSystem : MonoBehaviour
         controller.OnHeavyAttackEvent += HandleHeavyAttack;
         TryFindOpponent();
         MultiplayerScript = GetComponent<MultiplayerPlayerController>();
-        animationScript = MultiplayerScript.animationScript;
+        animationScript   = MultiplayerScript.animationScript;
     }
 
     private void OnDestroy()
@@ -88,7 +89,9 @@ public class CombatSystem : MonoBehaviour
     {
         if (!opponentLinked) { TryFindOpponent(); return; }
         if (!combatEnabled) return;
+
         HandleBlock();
+        HandleSeparation();  // FIX: prevent players phasing into each other
     }
 
     // -------------------------------------------------------
@@ -101,11 +104,11 @@ public class CombatSystem : MonoBehaviour
         foreach (var other in allCombat)
         {
             if (other == this) continue;
-            opponentHealth = other.GetComponent<PlayerHealth>();
-            opponentCombat = other;
+            opponentHealth     = other.GetComponent<PlayerHealth>();
+            opponentCombat     = other;
             opponentController = other.GetComponent<MultiplayerPlayerController>();
-            opponentVFX = other.GetComponent<CombatVFX>();
-            opponentLinked = true;
+            opponentVFX        = other.GetComponent<CombatVFX>();
+            opponentLinked     = true;
             Debug.Log("[P" + controller.PlayerID + " CombatSystem] opponent linked");
             break;
         }
@@ -121,6 +124,27 @@ public class CombatSystem : MonoBehaviour
     }
 
     // -------------------------------------------------------
+    // FIX: player separation
+    // Only this player's CombatSystem applies force to itself — the opponent's
+    // script does the same for the other side, so both get pushed equally.
+    // Using ApplyKnockback keeps it consistent with the existing physics.
+    // -------------------------------------------------------
+
+    private void HandleSeparation()
+    {
+        if (opponentController == null) return;
+
+        float dist = Vector3.Distance(transform.position, opponentController.transform.position);
+        if (dist >= minSeparationDistance || dist < 0.01f) return;
+
+        Vector3 pushDir = (transform.position - opponentController.transform.position).normalized;
+        pushDir.y = 0f;
+
+        float strength = (1f - (dist / minSeparationDistance)) * separationForce;
+        controller.ApplyKnockback(pushDir * strength * Time.deltaTime);
+    }
+
+    // -------------------------------------------------------
     // attacks
     // -------------------------------------------------------
 
@@ -130,15 +154,10 @@ public class CombatSystem : MonoBehaviour
         if (!canLight || IsBlocking) return;
 
         IsAttacking = true;
-
         StartCoroutine(PerformAttack(lightAttackDamage, lightKnockbackForce,
                                      lightAttackCooldown, lightHitStopDuration,
                                      lightShakeMagnitude, "LIGHT"));
-
         animationScript.PlayLightAttack();
-
-
-
     }
 
     private void HandleHeavyAttack()
@@ -147,22 +166,15 @@ public class CombatSystem : MonoBehaviour
         if (!canHeavy || IsBlocking || !heavyEnabled) return;
 
         IsAttacking = true;
-
         StartCoroutine(PerformAttack(heavyAttackDamage, heavyKnockbackForce,
                                      heavyAttackCooldown, heavyHitStopDuration,
                                      heavyShakeMagnitude, "HEAVY"));
-
         animationScript.PlayHeavyAttack();
-
-
-
-
     }
 
     private IEnumerator PerformAttack(float damage, float knockbackForce, float cooldown,
                                       float hitStopDur, float shakeMag, string type)
     {
-        //IsAttacking = true;
         if (type == "LIGHT") canLight = false;
         else canHeavy = false;
 
@@ -172,33 +184,29 @@ public class CombatSystem : MonoBehaviour
 
         if (dist <= attackRange)
         {
-            bool isBlocked = opponentCombat != null && opponentCombat.IsBlocking;
-            float finalDamage = isBlocked ? damage * (1f - blockDamageReduction) : damage;
-            float finalKnockback = isBlocked ? knockbackForce * blockedKnockbackMult : knockbackForce;
+            bool isBlocked     = opponentCombat != null && opponentCombat.IsBlocking;
+            float finalDamage  = isBlocked ? damage * (1f - blockDamageReduction) : damage;
+            float finalKnock   = isBlocked ? knockbackForce * blockedKnockbackMult : knockbackForce;
 
             opponentHealth.TakeDamage(finalDamage);
 
             Vector3 diff = opponentHealth.transform.position - transform.position;
             diff.y = 0f;
-            Vector3 dir = diff.magnitude > 0.01f ? diff.normalized : (transform.right * (controller.PlayerID == 1 ? 1f : -1f));
+            Vector3 dir          = diff.magnitude > 0.01f ? diff.normalized : (transform.right * (controller.PlayerID == 1 ? 1f : -1f));
             Vector3 knockbackDir = (dir + Vector3.up * knockbackUpAngle).normalized;
-            opponentController?.ApplyKnockback(knockbackDir * finalKnockback);
+            opponentController?.ApplyKnockback(knockbackDir * finalKnock);
 
-            // --- juice ---
             Vector3 impactPos = opponentHealth.transform.position;
 
             if (!isBlocked)
             {
-                // sfx with pitch variance so repeated hits feel less robotic
                 AudioManager.Instance?.Play(
                     type == "LIGHT" ? AudioManager.Instance.lightHit : AudioManager.Instance.heavyHit,
                     1f, 0.08f);
 
-                // vfx burst on the opponent
                 if (type == "LIGHT") opponentVFX?.PlayLightHit(impactPos);
-                else opponentVFX?.PlayHeavyHit(impactPos);
+                else                 opponentVFX?.PlayHeavyHit(impactPos);
 
-                // hitstop + shake - heavy hits feel meatier
                 HitStop.Instance?.Freeze(hitStopDur);
                 CameraShake.Instance?.Shake(shakeDuration, shakeMag);
 
@@ -218,7 +226,6 @@ public class CombatSystem : MonoBehaviour
 
         yield return new WaitForSeconds(0.1f);
         IsAttacking = false;
-
         animationScript.PlayIdle();
 
         yield return new WaitForSeconds(cooldown - 0.1f);
@@ -244,7 +251,6 @@ public class CombatSystem : MonoBehaviour
         }
     }
 
-    // arm detached - heavy off for the rest of the round
     public void SetHeavyAttackEnabled(bool enabled)
     {
         heavyEnabled = enabled;
@@ -258,5 +264,9 @@ public class CombatSystem : MonoBehaviour
     {
         Gizmos.color = Color.purple;
         Gizmos.DrawWireSphere(transform.position, attackRange);
+
+        // visualise separation bubble too
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, minSeparationDistance);
     }
 }

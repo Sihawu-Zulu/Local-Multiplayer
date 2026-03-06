@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using UnityEngine;
 
 public class AnimationManager : MonoBehaviour
@@ -8,107 +6,35 @@ public class AnimationManager : MonoBehaviour
     [SerializeField] private List<string> AnimationBools;
     public Animator animator;
 
-
     void Start()
     {
         animator = GetComponent<Animator>();
         PlayIdle();
     }
 
-
-    public void PlayJump()
+    // clears every bool in the list then sets the one at [index] true
+    // keeps the animator state machine clean — only ever one state active
+    private void SetOnlyBool(int index)
     {
         for (int i = 0; i < AnimationBools.Count; i++)
-        {
             animator.SetBool(AnimationBools[i], false);
-        }
-        animator.SetBool(AnimationBools[0], true);
+
+        if (index >= 0 && index < AnimationBools.Count)
+            animator.SetBool(AnimationBools[index], true);
     }
 
-    public void PlayIdle()
-    {
-        for (int i = 0; i < AnimationBools.Count; i++)
-        {
-            animator.SetBool(AnimationBools[i], false);
-        }
-        animator.SetBool(AnimationBools[1], true);
-    }
+    public void PlayJump() => SetOnlyBool(0);
+    public void PlayIdle() => SetOnlyBool(1);
+    public void PlayRun() => SetOnlyBool(2);
+    public void PlayKnockDown() => SetOnlyBool(3);   
+                                                                                        
+    public void PlayLightAttack() => SetOnlyBool(4);
+    public void PlayGetUp()       => SetOnlyBool(5);
+    public void PlayTakeDamage()  => SetOnlyBool(6);
+    public void PlayGrab()        => SetOnlyBool(7);
+    public void PlayHeavyAttack() => SetOnlyBool(8);
 
-    public void PlayRun()
-    {
-        for (int i = 0; i < AnimationBools.Count; i++)
-        {
-            animator.SetBool(AnimationBools[i], false);
-        }
-        animator.SetBool(AnimationBools[2], true);
-    }
-
-    public void PlayKnockDown()
-    {
-        for (int i = 0; i < AnimationBools.Count; i++)
-        {
-            animator.SetBool(AnimationBools[i], false);
-        }
-        animator.SetBool(AnimationBools[3], true);
-    }
-
-    public void PlayKnockdown()
-    {
-        animator.SetBool("Knowdown", true);
-    }
-
-    // public void PlayKnockdownRoll()
-    // {
-    //     animator.SetBool("KnockdownRoll", true);
-    // }
-
-    public void PlayGetup()
-    {
-        animator.SetBool("Knockdown", false);
-    }
-
-    public void PlayLightAttack()
-    {
-        for (int i = 0; i < AnimationBools.Count; i++)
-        {
-            animator.SetBool(AnimationBools[i], false);
-        }
-        animator.SetBool(AnimationBools[4], true);
-    }
-
-    public void PlayGetUp()
-    {
-        for (int i = 0; i < AnimationBools.Count; i++)
-        {
-            animator.SetBool(AnimationBools[i], false);
-        }
-        animator.SetBool(AnimationBools[5], true);
-    }
-
-    public void PlayTakeDamage()
-    {
-        for (int i = 0; i < AnimationBools.Count; i++)
-        {
-            animator.SetBool(AnimationBools[i], false);
-        }
-        animator.SetBool(AnimationBools[6], true);
-    }
-
-    public void PlayGrab()
-    {
-        for (int i = 0; i < AnimationBools.Count; i++)
-        {
-            animator.SetBool(AnimationBools[i], false);
-        }
-        animator.SetBool(AnimationBools[7], true);
-    }
-
-    public void PlayHeavyAttack()
-    {
-        for (int i = 0; i < AnimationBools.Count; i++)
-        {
-            animator.SetBool(AnimationBools[i], false);
-        }
-        animator.SetBool(AnimationBools[8], true);
-    }
+    // kept for any external callers that used the old name
+    public void PlayKnockdown() => PlayKnockDown();
+    public void PlayGetup()     => PlayGetUp();
 }

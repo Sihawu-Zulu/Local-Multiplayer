@@ -21,7 +21,7 @@ public class RoundResultUI : MonoBehaviour
 
     [Header("Match Over Panel")]
     [SerializeField] private GameObject matchOverRoot;
-    [SerializeField] private RectTransform   matchBannerRect;
+    [SerializeField] private RectTransform  matchBannerRect;
     [SerializeField] private TextMeshProUGUI matchWinnerText;
     [SerializeField] private TextMeshProUGUI matchScoreText;
     [SerializeField] private float matchFadeInDuration = 0.4f;
