@@ -1,36 +1,74 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-
-
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
-    [Header("Pool")]
-    [SerializeField] private int poolSize = 12;
 
-    [Header("Hit SFX")]
+
+    [Header("Master Volumes")]
+    [SerializeField, Range(0f, 1f)] private float masterVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float musicVolume  = 0.7f;
+    [SerializeField, Range(0f, 1f)] private float sfxVolume    = 1f;
+
+    public float MasterVolume { get => masterVolume; set { masterVolume = value; RefreshMusicVolume(); } }
+    public float MusicVolume  { get => musicVolume;  set { musicVolume  = value; RefreshMusicVolume(); } }
+    public float SFXVolume    { get => sfxVolume;   set { sfxVolume    = value; } }
+
+   
+    [Header("Music")]
+    public AudioClip musicTrack;   
+
+   
+
+    [Header("Combat SFX")]
     public AudioClip lightHit;
     public AudioClip heavyHit;
+    public AudioClip blockImpact;
 
     [Header("Knockdown SFX")]
     public AudioClip knockdownFall;
-    public AudioClip mashGetUp;       
+    public AudioClip mashGetUp;
     public AudioClip standUpSuccess;
 
     [Header("Arm SFX")]
     public AudioClip armDetach;
-    public AudioClip stringPullLoop; 
+    public AudioClip stringPullLoop;
 
     [Header("Killer Shot SFX")]
     public AudioClip killerShotTrigger;
+    public AudioClip killerShotWin;
+    public AudioClip killerShotEarly;
+    public AudioClip killerShotPerfect;
 
-    [Header("Master Volume")]
-    [SerializeField, Range(0f, 1f)] private float masterVolume = 1f;
+    [Header("Round SFX")]
+    public AudioClip roundStartBell;
+    public AudioClip roundWinChant;
+    public AudioClip matchWinChant;
+    public AudioClip countdownTick;
+    public AudioClip countdownFinalTick;
 
-    private List<AudioSource> pool   = new List<AudioSource>();
-    private AudioSource loopSrc;   
+    [Header("UI SFX")]
+    public AudioClip menuNavigate;
+    public AudioClip menuConfirm;
+    public AudioClip menuBack;
+
+    [Header("Ambient")]
+    public AudioClip ambientLoop;
+
+
+    [Header("SFX Pool")]
+    [SerializeField] private int sfxPoolSize = 16;
+
+    private List<AudioSource> sfxPool = new List<AudioSource>();
+    private AudioSource  musicSource;
+    private AudioSource ambientSource;
+    private AudioSource  stringLoopSource;
+
+    private float musicTargetVolume = 0f;
+    private Coroutine musicFadeCoroutine;
+
 
 
     private void Awake()
@@ -38,56 +76,138 @@ public class AudioManager : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        BuildPool();
+
+        BuildSFXPool();
+        BuildMusicSource();
+        BuildAmbientSource();
+        BuildStringLoopSource();
     }
 
-    private void BuildPool()
+    private void BuildSFXPool()
     {
-        for (int i = 0; i < poolSize; i++)
+        for (int i = 0; i < sfxPoolSize; i++)
         {
-            var s = gameObject.AddComponent<AudioSource>();
-            s.playOnAwake = false;
-            pool.Add(s);
+            var src = gameObject.AddComponent<AudioSource>();
+            src.playOnAwake = false;
+            sfxPool.Add(src);
         }
-
-        loopSrc             = gameObject.AddComponent<AudioSource>();
-        loopSrc.playOnAwake = false;
-        loopSrc.loop        = true;
-        loopSrc.volume      = masterVolume * 0.55f;
     }
 
-  
-    public void Play(AudioClip clip, float volume = 1f, float pitchVariance = 0f)
+    private void BuildMusicSource()
+    {
+        musicSource  = gameObject.AddComponent<AudioSource>();
+        musicSource.clip = musicTrack;
+        musicSource.loop = true;
+        musicSource.playOnAwake = false;
+        musicSource.volume = 0f;
+
+        if (musicTrack != null) musicSource.Play();
+    }
+
+    private void BuildAmbientSource()
+    {
+        ambientSource = gameObject.AddComponent<AudioSource>();
+        ambientSource.clip  = ambientLoop;
+        ambientSource.loop  = true;
+        ambientSource.playOnAwake = false;
+        ambientSource.volume = 0f;
+    }
+
+    private void BuildStringLoopSource()
+    {
+        stringLoopSource = gameObject.AddComponent<AudioSource>();
+        stringLoopSource.loop  = true;
+        stringLoopSource.playOnAwake = false;
+        stringLoopSource.volume  = 0f;
+    }
+
+ 
+    public void SetMusicVolume(float targetVolume, float fadeDuration = 1f)
+    {
+        musicTargetVolume = targetVolume;
+
+        if (musicFadeCoroutine != null) StopCoroutine(musicFadeCoroutine);
+        musicFadeCoroutine = StartCoroutine(
+            FadeSource(musicSource, masterVolume * musicVolume * targetVolume, fadeDuration));
+    }
+
+   
+    public void RestartMusic()
+    {
+        if (musicTrack == null) return;
+        musicSource.Stop();
+        musicSource.Play();
+    }
+
+    private void RefreshMusicVolume()
+    {
+        musicSource.volume   = masterVolume * musicVolume * musicTargetVolume;
+        ambientSource.volume = masterVolume * musicVolume * 0.35f;
+    }
+
+
+
+    public void StartAmbient(float fadeDuration = 2f)
+    {
+        if (ambientLoop == null) return;
+        if (!ambientSource.isPlaying) ambientSource.Play();
+        StartCoroutine(FadeSource(ambientSource, masterVolume * musicVolume * 0.35f, fadeDuration));
+    }
+
+    public void StopAmbient(float fadeDuration = 1.5f)
+    {
+        StartCoroutine(FadeSource(ambientSource, 0f, fadeDuration, stopOnComplete: true));
+    }
+
+
+    public void PlaySFX(AudioClip clip, float volume = 1f, float pitchVariance = 0f)
     {
         if (clip == null) return;
-
-        AudioSource src = GetFree();
-        src.clip   = clip;
-        src.volume = masterVolume * volume;
-        src.pitch  = 1f + Random.Range(-pitchVariance, pitchVariance);
+        AudioSource src = GetFreeSFXSource();
+        src.clip = clip;
+        src.volume  = masterVolume * sfxVolume * volume;
+        src.pitch = 1f + Random.Range(-pitchVariance, pitchVariance);
         src.Play();
     }
 
+
+    public void Play(AudioClip clip, float volume = 1f, float pitchVariance = 0f)
+        => PlaySFX(clip, volume, pitchVariance);
+
+    private AudioSource GetFreeSFXSource()
+    {
+        foreach (var s in sfxPool)
+            if (!s.isPlaying) return s;
+        return sfxPool[0];    
+    }
+
+ 
     public void StartStringPullLoop()
     {
-        if (stringPullLoop == null || loopSrc.isPlaying) return;
-        loopSrc.clip = stringPullLoop;
-        loopSrc.Play();
+        if (stringPullLoop == null || stringLoopSource.isPlaying) return;
+        stringLoopSource.clip   = stringPullLoop;
+        stringLoopSource.volume = masterVolume * sfxVolume * 0.55f;
+        stringLoopSource.Play();
     }
 
-    public void StopStringPullLoop()
+    public void StopStringPullLoop() => stringLoopSource.Stop();
+
+
+
+    private IEnumerator FadeSource(AudioSource src, float targetVol, float duration,
+                                   bool stopOnComplete = false)
     {
-        loopSrc.Stop();
-    }
+        float startVol = src.volume;
+        float elapsed  = 0f;
 
-    // -------------------------------------------------------
+        while (elapsed < duration)
+        {
+            elapsed   += Time.unscaledDeltaTime;
+            src.volume = Mathf.Lerp(startVol, targetVol, elapsed / duration);
+            yield return null;
+        }
 
-    private AudioSource GetFree()
-    {
-        foreach (var s in pool)
-            if (!s.isPlaying) return s;
-
-       
-        return pool[0];
+        src.volume = targetVol;
+        if (stopOnComplete) src.Stop();
     }
 }

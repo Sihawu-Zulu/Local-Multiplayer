@@ -1783,6 +1783,7 @@ Transform:
   - {fileID: 316320518}
   - {fileID: 880042827}
   - {fileID: 31812902}
+  - {fileID: 1324847945}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &277316809
@@ -25336,7 +25337,19 @@ MonoBehaviour:
       m_Calls: []
   OnCountdownStep:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1157975246}
+        m_TargetAssemblyTypeName: RoundAudioController, Assembly-CSharp
+        m_MethodName: PlayCountdownTick
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   OnFightStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -26291,13 +26304,15 @@ GameObject:
   m_Component:
   - component: {fileID: 1157975245}
   - component: {fileID: 1157975244}
+  - component: {fileID: 1157975247}
+  - component: {fileID: 1157975246}
   m_Layer: 0
   m_Name: <<<---AudioManager--->>>
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1157975244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26310,16 +26325,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93bb500b9a4bb3c4ca40c84adb681f22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
-  poolSize: 12
+  masterVolume: 1
+  musicVolume: 0.7
+  sfxVolume: 1
+  musicTrack: {fileID: 8300000, guid: 82a8ac74164e61646945e1b7132d7cfc, type: 3}
   lightHit: {fileID: 8300000, guid: ac6717755fe6770479b55b5c095a7c4f, type: 3}
   heavyHit: {fileID: 8300000, guid: ac6717755fe6770479b55b5c095a7c4f, type: 3}
+  blockImpact: {fileID: 0}
   knockdownFall: {fileID: 0}
   mashGetUp: {fileID: 0}
   standUpSuccess: {fileID: 0}
   armDetach: {fileID: 0}
   stringPullLoop: {fileID: 0}
   killerShotTrigger: {fileID: 0}
-  masterVolume: 1
+  killerShotWin: {fileID: 0}
+  killerShotEarly: {fileID: 0}
+  killerShotPerfect: {fileID: 0}
+  roundStartBell: {fileID: 8300000, guid: 5d591abc045496940ac14cd63b6448f5, type: 3}
+  roundWinChant: {fileID: 8300000, guid: 42b7a7479138e354f83552d868b4136d, type: 3}
+  matchWinChant: {fileID: 8300000, guid: 42b7a7479138e354f83552d868b4136d, type: 3}
+  countdownTick: {fileID: 0}
+  countdownFinalTick: {fileID: 0}
+  menuNavigate: {fileID: 0}
+  menuConfirm: {fileID: 0}
+  menuBack: {fileID: 0}
+  ambientLoop: {fileID: 8300000, guid: 82a8ac74164e61646945e1b7132d7cfc, type: 3}
+  sfxPoolSize: 16
 --- !u!4 &1157975245
 Transform:
   m_ObjectHideFlags: 0
@@ -26335,6 +26366,48 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1157975246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1157975243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 435f19ffccbea3b4db5185aef6014701, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoundAudioController
+  roundManager: {fileID: 277316811}
+  killerShotManager: {fileID: 277316810}
+  bellDelay: 0.25
+  chantDelay: 0.55
+--- !u!114 &1157975247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1157975243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8ff541913bc602409290a3204c8cfaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MusicManager
+  menuSceneName: MainMenu
+  gameSceneName: Game
+  menuVolume: 0.45
+  preFightVolume: 0.7
+  fightingVolume: 1
+  killerShotVolume: 0.75
+  roundEndVolume: 0.25
+  matchEndVolume: 0
+  menuFadeIn: 2
+  preFightFade: 2.5
+  fightSnapFade: 0.5
+  killerShotFade: 0.8
+  roundEndFade: 0.4
+  matchEndFade: 3
 --- !u!1 &1161186100
 GameObject:
   m_ObjectHideFlags: 0
@@ -32940,6 +33013,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1319523995}
   m_CullTransparentMesh: 1
+--- !u!1 &1324847944
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1324847945}
+  - component: {fileID: 1324847946}
+  m_Layer: 0
+  m_Name: RoundAudioController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1324847945
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324847944}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 277316808}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1324847946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324847944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 435f19ffccbea3b4db5185aef6014701, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoundAudioController
+  roundManager: {fileID: 277316811}
+  killerShotManager: {fileID: 277316810}
+  bellDelay: 0.25
+  chantDelay: 0.55
 --- !u!1 &1337619513
 GameObject:
   m_ObjectHideFlags: 0
