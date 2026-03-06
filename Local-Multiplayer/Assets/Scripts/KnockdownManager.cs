@@ -160,6 +160,8 @@ public class KnockdownManager : MonoBehaviour
         GetCombat(downedPlayerID)?.SetCombatEnabled(false);
         GetPhysics(downedPlayerID)?.SetPhysicsEnabled(false);   // pause ragdoll layer while on the floor
 
+        GetController(downedPlayerID)?.animationScript.PlayKnockDown();
+
         // push the downed player away from the attacker then tip them flat
         ApplyKnockdownKnockback(downedID);
         //animatorScript.PlayKnockdown();
@@ -351,6 +353,8 @@ public class KnockdownManager : MonoBehaviour
 
         CurrentState = KnockdownState.Recovered;
         StopStringTrails();
+
+        GetController(downedPlayerID)?.animationScript.PlayGetUp();
 
         // stand back up
         StartCoroutine(StandUp(downedPlayerID, onComplete: () =>
