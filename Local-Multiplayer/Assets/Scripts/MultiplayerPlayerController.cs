@@ -66,7 +66,8 @@ public class MultiplayerPlayerController : MonoBehaviour
         cc = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
         playerHealth = GetComponent<PlayerHealth>();
-        knockdownManager = GetComponent<KnockdownManager>();
+
+        knockdownManager = FindFirstObjectByType<KnockdownManager>();
     }
 
     private void OnEnable()
@@ -90,6 +91,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     {
 
 
+
         CheckGround();
         ApplyGravity();
 
@@ -107,7 +109,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         //Animation------------------------------------
 
-        if (knockdownManager != null && knockdownManager.CurrentState != KnockdownState.None)
+        if (knockdownManager != null && knockdownManager.CurrentState != KnockdownState.None && knockdownManager.CurrentState != KnockdownState.Recovered)
         {
             return;
         }

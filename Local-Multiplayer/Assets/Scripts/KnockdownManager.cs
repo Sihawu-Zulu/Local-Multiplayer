@@ -160,7 +160,7 @@ public class KnockdownManager : MonoBehaviour
         GetCombat(downedPlayerID)?.SetCombatEnabled(false);
         GetPhysics(downedPlayerID)?.SetPhysicsEnabled(false);   // pause ragdoll layer while on the floor
 
-        GetController(downedPlayerID)?.animationScript.PlayKnockDown();
+        GetController(downedPlayerID)?.animationScript.PlayGetUp();
 
         // push the downed player away from the attacker then tip them flat
         ApplyKnockdownKnockback(downedID);

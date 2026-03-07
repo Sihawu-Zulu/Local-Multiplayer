@@ -26,27 +26,10 @@ public class AnimationManager : MonoBehaviour
     public void PlayJump() => SetOnlyBool(0);
     public void PlayIdle() => SetOnlyBool(1);
     public void PlayRun() => SetOnlyBool(2);
-    public void PlayKnockDown()
-    {
-        //ResetAllBools();
-
-        animator.SetBool("Idle", false);
-        animator.SetBool("Run", false);
-        animator.SetBool("Jump", false);
-
-        animator.SetBool("KnockDown", true);
-        SetOnlyBool(3);
-
-    }
+    public void PlayKnockDown() => SetOnlyBool(3);
 
     public void PlayLightAttack() => SetOnlyBool(4);
-    public void PlayGetUp()
-    {
-        animator.SetBool("KnockDown", false);
-        animator.SetBool("GetUp", true);
-
-        SetOnlyBool(5);
-    }
+    public void PlayGetUp() => SetOnlyBool(5);
     public void PlayTakeDamage() => SetOnlyBool(6);
     public void PlayGrab() => SetOnlyBool(7);
     public void PlayHeavyAttack() => SetOnlyBool(8);
