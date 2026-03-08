@@ -10,10 +10,10 @@ public class PlayerHealth : MonoBehaviour
 {
     [Header("Health Settings")]
     [SerializeField] private float maxHealth = 100f;
-    [SerializeField] private float killerShotThreshold = 30f;  
+    [SerializeField] private float killerShotThreshold = 30f;   // % hp at which killer shot triggers
 
     [Header("Reaction Settings")]
-    [SerializeField] private float reactDuration = 0.5f;        //  TakeDamage anim length
+    [SerializeField] private float reactDuration = 0.5f;        // how long IsReacting stays true — match your TakeDamage anim length
 
     [Header("Animation stuff")]
     public bool IsReacting { get; private set; }
@@ -28,7 +28,7 @@ public class PlayerHealth : MonoBehaviour
     public bool KillerShotReady { get; private set; }
 
     // --- events ---
-    public UnityEvent<float, float> OnHealthChanged;      
+    public UnityEvent<float, float> OnHealthChanged;      // (currentHP, maxHP)
     public UnityEvent OnKillerShotTriggered;
     public UnityEvent OnPlayerDefeated;
 
@@ -51,17 +51,18 @@ public class PlayerHealth : MonoBehaviour
     {
         if (IsDefeated) return;
 
-        
+        // FIX: apply damage immediately — no 1 second delay
+        // health bar, vfx, and hitstop all land on the same frame as the hit
         currentHealth = Mathf.Max(0f, currentHealth - amount);
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
-      
+        // play react animation and hold IsReacting for the duration of the clip
         if (reactCoroutine != null) StopCoroutine(reactCoroutine);
         reactCoroutine = StartCoroutine(ReactRoutine());
 
         float pct = (currentHealth / maxHealth) * 100f;
 
-        
+        // trigger killer shot phase once hp drops low enough — only fires once per life
         if (!KillerShotReady && pct <= killerShotThreshold)
         {
             KillerShotReady = true;
@@ -73,9 +74,6 @@ public class PlayerHealth : MonoBehaviour
             IsDefeated = true;
             OnPlayerDefeated?.Invoke();
             Debug.Log($"[{gameObject.name}] defeated");
-
-            HitStop.Instance?. Freeze(0.18f);
-            CameraShake.Instance?. Shake(0.4f, 0.25f);
         }
     }
 
@@ -84,7 +82,9 @@ public class PlayerHealth : MonoBehaviour
         IsReacting = true;
         MultiplayerScript.animationScript.PlayTakeDamage();
 
-  
+        // FIX: hold IsReacting for the actual animation duration
+        // previously this was WaitForSeconds(0f) which reset instantly,
+        // meaning movement/idle animations immediately clobbered the hit reaction
         yield return new WaitForSeconds(reactDuration);
 
         IsReacting = false;

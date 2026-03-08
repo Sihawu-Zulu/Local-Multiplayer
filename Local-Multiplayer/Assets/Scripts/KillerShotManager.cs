@@ -240,8 +240,8 @@ public class KillerShotManager : MonoBehaviour
     }
 
     // -------------------------------------------------------
-    // haptics stuff
-    
+    // haptics
+    // -------------------------------------------------------
 
     private void StartHaptics()
     {

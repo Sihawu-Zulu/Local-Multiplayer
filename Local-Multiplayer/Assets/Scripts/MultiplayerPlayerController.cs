@@ -109,10 +109,10 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         //Animation------------------------------------
 
-    if (knockdownManager != null && knockdownManager.CurrentState != KnockdownState.None)
-    {
-        return;
-    }
+        if (knockdownManager != null && knockdownManager.CurrentState != KnockdownState.None && knockdownManager.CurrentState != KnockdownState.Recovered)
+        {
+            return;
+        }
 
 
         CombatSystem combat = GetComponent<CombatSystem>();
@@ -151,7 +151,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     // spawn stuffff
     // -------------------------------------------------------
 
-    public void MoveToSpawnPoint()
+    private void MoveToSpawnPoint()
     {
         facingDirection = PlayerID == 1 ? 1f : -1f;
         Transform sp = PlayerID == 1 ? p1SpawnPoint : p2SpawnPoint;
