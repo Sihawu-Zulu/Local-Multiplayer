@@ -109,10 +109,10 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         //Animation------------------------------------
 
-        if (knockdownManager != null && knockdownManager.CurrentState != KnockdownState.None && knockdownManager.CurrentState != KnockdownState.Recovered)
-        {
-            return;
-        }
+    if (knockdownManager != null && knockdownManager.CurrentState != KnockdownState.None)
+    {
+        return;
+    }
 
 
         CombatSystem combat = GetComponent<CombatSystem>();

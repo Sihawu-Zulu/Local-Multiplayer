@@ -506,11 +506,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 532455092580719947, guid: aa9f8859c105c5e4c9b237d864bd3027, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 532455092580719947, guid: aa9f8859c105c5e4c9b237d864bd3027, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 532455092580719947, guid: aa9f8859c105c5e4c9b237d864bd3027, type: 3}
       propertyPath: m_SizeDelta.x
@@ -7073,11 +7073,7 @@ MonoBehaviour:
   armDetachShakeDuration: 0.3
   armDetachHitStopDur: 0.12
   knockbackForce: 4
-  fallRotateDuration: 0.25
-  fallRotateAngle: 90
-  rollDuration: 0.18
-  rollAngle: 270
-  rollMoveDistance: 0.4
+  getUpDuration: 1.2
   OnKnockdownStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -9279,7 +9275,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &534528285
 Transform:
   m_ObjectHideFlags: 0
@@ -48447,11 +48443,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2993743744345343852, guid: 023c26e3b5416614983b69f243d95218, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2993743744345343852, guid: 023c26e3b5416614983b69f243d95218, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5703859356644104074, guid: 023c26e3b5416614983b69f243d95218, type: 3}
       propertyPath: m_Name
