@@ -2,10 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
-// round ends only when a player's HP hits zero (OnPlayerDefeated)
-// killer shot winner triggers knockdown phase via knockdoenmanager, but does not end the round immediately
-// killer shot winner triggers knockdown via KnockdownManager... not a round ender
-
 public class RoundManager : MonoBehaviour
 {
     [Header("References")]
@@ -14,8 +10,8 @@ public class RoundManager : MonoBehaviour
 
 
     [Header("Round Settings")]
-    [SerializeField] private int   roundsToWin     = 2;
-    [SerializeField] private float roundEndDelay   = 2f;
+    [SerializeField] private int roundsToWin  = 2;
+    [SerializeField] private float roundEndDelay = 2f;
     [SerializeField] private float roundStartDelay = 1.5f;
 
     // --- states n stuff ---
@@ -28,6 +24,10 @@ public class RoundManager : MonoBehaviour
 
     private PlayerHealth p1Health;
     private PlayerHealth p2Health;
+
+  
+    private MultiplayerPlayerController p1Controller;
+    private MultiplayerPlayerController p2Controller;
 
     // --- events ---
     public UnityEvent<int>  OnRoundStarted;
@@ -67,11 +67,12 @@ public class RoundManager : MonoBehaviour
         PlayerHealth found1 = null;
         PlayerHealth found2 = null;
 
-        foreach (var c in controllers)
-        {
-            if (c.PlayerID == 1)      found1 = c.GetComponent<PlayerHealth>();
-            else if (c.PlayerID == 2) found2 = c.GetComponent<PlayerHealth>();
-        }
+    foreach (var c in controllers)
+    {
+        if (c.PlayerID == 1) { found1 = c.GetComponent<PlayerHealth>(); p1Controller = c; }
+        else if
+         (c.PlayerID == 2) { found2 = c.GetComponent<PlayerHealth>(); p2Controller = c; }
+    }
 
         if (found1 == null || found2 == null) return;   
 
@@ -136,6 +137,9 @@ public class RoundManager : MonoBehaviour
         knockdownManager?.ResetKnockdown();
         p1Health?.ResetHealth();
         p2Health?.ResetHealth();
+
+    // p1Controller?.MoveToSpawnPoint();
+    // p2Controller?.MoveToSpawnPoint();
 
         StartCoroutine(StartRoundWithDelay());
     }

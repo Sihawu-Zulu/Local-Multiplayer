@@ -151,7 +151,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     // spawn stuffff
     // -------------------------------------------------------
 
-    private void MoveToSpawnPoint()
+    public void MoveToSpawnPoint()
     {
         facingDirection = PlayerID == 1 ? 1f : -1f;
         Transform sp = PlayerID == 1 ? p1SpawnPoint : p2SpawnPoint;
