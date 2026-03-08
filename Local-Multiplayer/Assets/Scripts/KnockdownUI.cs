@@ -4,30 +4,26 @@ using UnityEngine.UI;
 using TMPro;
 
 
-
 public class KnockdownUI : MonoBehaviour
 {
 
     [Header("P1 Side - left")]
-    [SerializeField] private GameObject      p1MashRoot;
-    [SerializeField] private Image           p1MashIcon;
+    [SerializeField] private GameObject p1MashRoot;
+    [SerializeField] private Image p1MashIcon;
     [SerializeField] private TextMeshProUGUI p1MashCountText;
-    [SerializeField] private GameObject      p1HoldRoot;
-    [SerializeField] private Image           p1HoldIcon;
+    [SerializeField] private GameObject p1HoldRoot;
+    [SerializeField] private Image p1HoldIcon;
     [SerializeField] private TextMeshProUGUI p1HoldText;
 
 
     [Header("P2 Side - right")]
-    [SerializeField] private GameObject      p2MashRoot;
-    [SerializeField] private Image           p2MashIcon;
+    [SerializeField] private GameObject p2MashRoot;
+    [SerializeField] private Image  p2MashIcon;
     [SerializeField] private TextMeshProUGUI p2MashCountText;
-    [SerializeField] private GameObject      p2HoldRoot;
-    [SerializeField] private Image           p2HoldIcon;
+    [SerializeField] private GameObject p2HoldRoot;
+    [SerializeField] private Image p2HoldIcon;
     [SerializeField] private TextMeshProUGUI p2HoldText;
 
-    // -------------------------------------------------------
-    // shared labels
-    // -------------------------------------------------------
     [Header("Labels")]
     [SerializeField] private string holdPromptLabel = "Hold  to pull!";
     [SerializeField] private int  totalMashes = 15;
@@ -62,13 +58,13 @@ public class KnockdownUI : MonoBehaviour
     [SerializeField] private KnockdownManager knockdownManager;
 
 
-    private bool  isMashPulsing   = false;
-    private bool  isHoldPulsing   = false;
-    private bool  isHolding       = false;
+    private bool  isMashPulsing = false;
+    private bool  isHoldPulsing = false;
+    private bool  isHolding  = false;
     private float lastTugProgress = 0f;
 
 
-    private GameObject  activeMashRoot;
+    private GameObject activeMashRoot;
     private Image activeMashIcon;
     private TextMeshProUGUI activeMashCount;
     private GameObject activeHoldRoot;

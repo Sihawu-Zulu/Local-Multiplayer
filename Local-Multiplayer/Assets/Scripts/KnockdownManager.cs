@@ -27,31 +27,36 @@ public class KnockdownManager : MonoBehaviour
     [Header("Knockback / Fall Settings")]
     [SerializeField] private float knockbackForce = 12f;
 
-    // --- fallback fall flat if knockdown anim doesnt play ---
+
     [Header("Fall Flat Fallback")]
-    [SerializeField] private float fallRotateDuration  = 0.22f;   // how long the tip-over takes
-    [SerializeField] private float fallRotateAngle     = 90f;     // degrees to tip (keep at 90)
-    [SerializeField] private float animWaitBeforeFall  = 0.15f;   // short window to let anim start before fallback kicks in
+    [SerializeField] private float fallRotateDuration  = 0.22f;  
+    [SerializeField] private float fallRotateAngle = 90f;    
+    [SerializeField] private float animWaitBeforeFall  = 0.15f;   
 
     [Header("Animation stuff")]
     private AnimationManager animatorScript;
     [SerializeField] private float getUpDuration = 1.2f;
 
-    // --- string line renderer ---
+    
     [Header("String Line Renderer")]
-    [SerializeField] private LineRenderer stringLineRenderer;     // assign in Inspector on this GO
-    [SerializeField] private float stringLineWidth      = 0.04f;
+    [SerializeField] private LineRenderer stringLineRenderer;     
+    [SerializeField] private float stringLineWidth = 0.04f;
     [SerializeField] private Color stringLineColorStart = new Color(1f, 0.85f, 0.2f, 1f);
     [SerializeField] private Color stringLineColorEnd   = new Color(1f, 0.3f, 0.1f, 0.6f);
-    [SerializeField] private float stringWobbleAmount   = 0.06f;  // subtle wobble mid-point
-    [SerializeField] private float stringWobbleSpeed    = 8f;
+    [SerializeField] private float stringWobbleAmount = 0.06f;  
+    [SerializeField] private float stringWobbleSpeed = 8f;
+
+
+    [Header("Player Colours")]
+[SerializeField] private Color p1Color = new Color(0.9f, 0.2f, 0.2f); 
+[SerializeField] private Color p2Color = new Color(0.2f, 0.4f, 0.9f);  
 
     private Transform p1ArmTransform;
     private Transform p2ArmTransform;
     private ParticleSystem p1StringTrail;
     private ParticleSystem p2StringTrail;
 
-    // --- events ---
+   
     public UnityEvent<int>   OnKnockdownStarted;
     public UnityEvent<int>   OnPlayerRecovered;
     public UnityEvent<int>   OnArmDetached;
@@ -74,22 +79,21 @@ public class KnockdownManager : MonoBehaviour
     // --- state ---
     public KnockdownState CurrentState { get; private set; } = KnockdownState.None;
 
-    private int   downedPlayerID    = 0;
-    private int   attackerPlayerID  = 0;
-    private int   mashCount         = 0;
-    private float tugProgress       = 0f;
-    private float recoveryTimer     = 0f;
-    private bool  p1ArmGone         = false;
-    private bool  p2ArmGone         = false;
-    private bool  p1GetUpPressed    = false;
-    private bool  p2GetUpPressed    = false;
+    private int   downedPlayerID  = 0;
+    private int   attackerPlayerID = 0;
+    private int   mashCount  = 0;
+    private float tugProgress = 0f;
+    private float recoveryTimer= 0f;
+    private bool  p1ArmGone = false;
+    private bool  p2ArmGone = false;
+    private bool  p1GetUpPressed = false;
+    private bool  p2GetUpPressed = false;
 
-    private Coroutine rollCoroutine     = null;
-    private Coroutine fallCoroutine     = null;
-    private bool      isTuggingThisFrame = false;   // read in Update, written in HandleTugInput
+    private Coroutine rollCoroutine = null;
+    private Coroutine fallCoroutine  = null;
+    private bool      isTuggingThisFrame = false;   
 
-    // -------------------------------------------------------
-
+   
     private void Update()
     {
         if (!playersResolved)
@@ -103,15 +107,13 @@ public class KnockdownManager : MonoBehaviour
         HandleMashInput();
         HandleTugInput();
         TickRecoveryTimer();
-        UpdateStringLine();  // draw/hide line renderer each frame
+        UpdateStringLine();  
     }
 
     public void OnP1GetUp() => p1GetUpPressed = true;
     public void OnP2GetUp() => p2GetUpPressed = true;
 
-    // -------------------------------------------------------
-    // resolve refs
-    // -------------------------------------------------------
+
 
     private void TryResolvePlayerReferences()
     {
@@ -135,15 +137,15 @@ public class KnockdownManager : MonoBehaviour
             if (arm.PlayerID == 2) { p2ArmTransform = arm.transform; p2StringTrail = arm.StringTrail; }
         }
 
-        // set up line renderer appearance once
+        
         if (stringLineRenderer != null)
         {
-            stringLineRenderer.positionCount = 3; // start, mid wobble point, end
-            stringLineRenderer.startWidth    = stringLineWidth;
-            stringLineRenderer.endWidth      = stringLineWidth * 0.5f;
-            stringLineRenderer.startColor    = stringLineColorStart;
-            stringLineRenderer.endColor      = stringLineColorEnd;
-            stringLineRenderer.enabled       = false;
+            stringLineRenderer.positionCount = 3; 
+            stringLineRenderer.startWidth  = stringLineWidth;
+            stringLineRenderer.endWidth   = stringLineWidth * 0.5f;
+            stringLineRenderer.startColor = stringLineColorStart;
+            stringLineRenderer.endColor = stringLineColorEnd;
+            stringLineRenderer.enabled = false;
         }
 
         playersResolved = true;
@@ -155,9 +157,7 @@ public class KnockdownManager : MonoBehaviour
         if (p2Controller != null) p2Controller.OnGetUpEvent -= OnP2GetUp;
     }
 
-    // -------------------------------------------------------
-    // entry point
-    // -------------------------------------------------------
+  
 
     public void StartKnockdown(int downedID)
     {
@@ -165,18 +165,18 @@ public class KnockdownManager : MonoBehaviour
 
         downedPlayerID   = downedID;
         attackerPlayerID = downedID == 1 ? 2 : 1;
-        mashCount        = 0;
-        tugProgress      = 0f;
-        recoveryTimer    = 0f;
-        CurrentState     = KnockdownState.Downed;
-        p1GetUpPressed   = false;
-        p2GetUpPressed   = false;
+        mashCount = 0;
+        tugProgress = 0f;
+        recoveryTimer = 0f;
+        CurrentState  = KnockdownState.Downed;
+        p1GetUpPressed = false;
+        p2GetUpPressed = false;
 
         GetController(downedPlayerID)?.SetMovementEnabled(false);
         GetCombat(downedPlayerID)?.SetCombatEnabled(false);
         GetPhysics(downedPlayerID)?.SetPhysicsEnabled(false);
 
-        // play knockdown anim then start the fallback timer in parallel
+      
         GetController(downedPlayerID)?.animationScript.PlayKnockDown();
         if (fallCoroutine != null) StopCoroutine(fallCoroutine);
         fallCoroutine = StartCoroutine(FallFlatFallback(downedID));
@@ -188,12 +188,10 @@ public class KnockdownManager : MonoBehaviour
         GetVFX(downedID)?.PlayKnockdownDust();
 
         OnKnockdownStarted?.Invoke(downedID);
-        Debug.Log($"[Knockdown] P{downedID} is down");
+        
     }
 
-    // -------------------------------------------------------
-    // knockback
-    // -------------------------------------------------------
+ 
 
     private void ApplyKnockdownKnockback(int downedID)
     {
@@ -202,19 +200,14 @@ public class KnockdownManager : MonoBehaviour
         if (downedCtrl == null || attackerCtrl == null) return;
 
         Vector3 diff  = downedCtrl.transform.position - attackerCtrl.transform.position;
-        diff.y        = 0f;
+        diff.y = 0f;
         Vector3 dir   = diff.magnitude > 0.01f ? diff.normalized : Vector3.right;
         Vector3 force = (dir + Vector3.up * 0.3f).normalized * knockbackForce;
 
         downedCtrl.ApplyKnockback(force);
     }
 
-    // -------------------------------------------------------
-    // fall flat fallback
-    // waits a short window to let the knockdown animation start playing.
-    // if the visual slot z-rotation hasn't changed meaningfully after that window
-    // (i.e. the anim isn't driving it), we rotate it 90° ourselves.
-    // -------------------------------------------------------
+
 
     private IEnumerator FallFlatFallback(int playerID)
     {
@@ -224,21 +217,20 @@ public class KnockdownManager : MonoBehaviour
         Transform visual = ctrl.GetVisualSlot();
         if (visual == null) yield break;
 
-        // give the anim a moment to start
+
         yield return new WaitForSeconds(animWaitBeforeFall);
 
-        // check if the animation is already tilting the character
-        // if z rotation is still near upright, the anim hasn't kicked in — do it manually
+
         float currentZ = visual.localRotation.eulerAngles.z;
-        bool animIsHandlingIt = currentZ > 15f && currentZ < 345f; // outside ~15° of upright
+        bool animIsHandlingIt = currentZ > 15f && currentZ < 345f; 
 
         if (!animIsHandlingIt)
         {
-            Debug.Log($"[Knockdown] P{playerID} knockdown anim not detected — applying fall flat fallback");
+            Debug.Log($"[Knockdown] P{playerID} knockdown anim not there doing to fall  fallback");
 
             Quaternion startRot = visual.localRotation;
 
-            // fall direction: away from attacker (same logic used for knockback)
+          
             var attackerCtrl = GetController(attackerPlayerID);
             float dir = 1f;
             if (attackerCtrl != null)
@@ -249,7 +241,7 @@ public class KnockdownManager : MonoBehaviour
             float elapsed = 0f;
             while (elapsed < fallRotateDuration)
             {
-                // stop if the state has already ended (e.g. player recovered instantly)
+              
                 if (CurrentState == KnockdownState.None) yield break;
 
                 elapsed += Time.deltaTime;
@@ -262,16 +254,14 @@ public class KnockdownManager : MonoBehaviour
         }
     }
 
-    // -------------------------------------------------------
-    // update loops
-    // -------------------------------------------------------
 
     private void HandleMashInput()
     {
         bool pressed = downedPlayerID == 1 ? p1GetUpPressed : p2GetUpPressed;
 
         if (downedPlayerID == 1) p1GetUpPressed = false;
-        else                     p2GetUpPressed = false;
+        else                     
+        p2GetUpPressed = false;
 
         if (!pressed) return;
 
@@ -293,9 +283,9 @@ public class KnockdownManager : MonoBehaviour
         if (attackerController == null) return;
 
         bool isTugging = attackerController.BlockHeld;
-        isTuggingThisFrame = isTugging; // expose to UpdateStringLine
+        isTuggingThisFrame = isTugging; 
 
-        // particle trail on downed player's arm
+        
         var trail = downedPlayerID == 1 ? p1StringTrail : p2StringTrail;
         if (trail != null)
         {
@@ -323,47 +313,45 @@ public class KnockdownManager : MonoBehaviour
             DetachArm();
     }
 
-    // -------------------------------------------------------
-    // line renderer — drawn from attacker hand toward downed arm
-    // -------------------------------------------------------
+  
+private void UpdateStringLine()
+{
+    if (stringLineRenderer == null) return;
 
-    private void UpdateStringLine()
+    if (!isTuggingThisFrame)
     {
-        if (stringLineRenderer == null) return;
-
-        if (!isTuggingThisFrame)
-        {
-            stringLineRenderer.enabled = false;
-            return;
-        }
-
-        // find arm transforms
-        var downedArmTransform    = downedPlayerID    == 1 ? p1ArmTransform : p2ArmTransform;
-        var attackerArmTransform  = attackerPlayerID  == 1 ? p1ArmTransform : p2ArmTransform;
-
-        if (downedArmTransform == null || attackerArmTransform == null)
-        {
-            // fall back: use player root positions
-            var downedCtrl   = GetController(downedPlayerID);
-            var attackerCtrl = GetController(attackerPlayerID);
-            if (downedCtrl == null || attackerCtrl == null) return;
-
-            SetStringLinePositions(
-                attackerCtrl.transform.position + Vector3.up * 0.8f,
-                downedCtrl.transform.position   + Vector3.up * 0.5f
-            );
-        }
-        else
-        {
-            SetStringLinePositions(attackerArmTransform.position, downedArmTransform.position);
-        }
-
-        stringLineRenderer.enabled = true;
+        stringLineRenderer.enabled = false;
+        return;
     }
+
+    var downedArmTransform   = downedPlayerID   == 1 ? p1ArmTransform : p2ArmTransform;
+    var attackerArmTransform = attackerPlayerID == 1 ? p1ArmTransform : p2ArmTransform;
+
+
+    Color armColor = downedPlayerID == 1 ? p1Color : p2Color;
+    Color fadedEnd = new Color(armColor.r, armColor.g, armColor.b, 0.3f);
+
+
+    stringLineRenderer.startColor = fadedEnd;   
+    stringLineRenderer.endColor   = armColor;   
+
+  
+    Vector3 from = attackerArmTransform != null
+        ? attackerArmTransform.position
+        : GetController(attackerPlayerID).transform.position + Vector3.up * 0.8f;
+
+   
+    Vector3 to = downedArmTransform != null
+        ? downedArmTransform.position
+        : GetController(downedPlayerID).transform.position + Vector3.up * 0.5f;
+
+    SetStringLinePositions(from, to);
+    stringLineRenderer.enabled = true;
+}
 
     private void SetStringLinePositions(Vector3 from, Vector3 to)
     {
-        // mid-point with a small wobble so it looks like a dangling string, not a laser
+       
         Vector3 mid     = (from + to) * 0.5f;
         float   wobbleX = Mathf.Sin(Time.time * stringWobbleSpeed) * stringWobbleAmount;
         float   wobbleY = Mathf.Cos(Time.time * stringWobbleSpeed * 0.7f) * stringWobbleAmount;
@@ -380,14 +368,12 @@ public class KnockdownManager : MonoBehaviour
 
         if (recoveryTimer >= recoveryTimeLimit)
         {
-            Debug.Log($"[Knockdown] P{downedPlayerID} ran out of time");
+            // Debug.Log($"[Knockdown] P{downedPlayerID} ran out of time");
             DetachArm();
         }
     }
 
-    // -------------------------------------------------------
-    // outcomes
-    // -------------------------------------------------------
+
 
     private void Recover()
     {
@@ -397,7 +383,7 @@ public class KnockdownManager : MonoBehaviour
         StopStringTrails();
         HideStringLine();
 
-        // reset the fall flat rotation before playing get up
+      
         ResetVisual(downedPlayerID);
 
         GetController(downedPlayerID)?.animationScript.PlayGetUp();
@@ -417,7 +403,8 @@ public class KnockdownManager : MonoBehaviour
             armTransform.localPosition = armDetachedOffset;
 
         if (downedPlayerID == 1) p1ArmGone = true;
-        else                     p2ArmGone = true;
+        else                     
+        p2ArmGone = true;
 
         GetCombat(downedPlayerID)?.SetHeavyAttackEnabled(false);
 
@@ -447,22 +434,18 @@ public class KnockdownManager : MonoBehaviour
             SnapArmBack(playerID);
             AudioManager.Instance?.Play(AudioManager.Instance.standUpSuccess, 1f);
             OnPlayerRecovered?.Invoke(playerID);
-            Debug.Log($"[Knockdown] P{playerID} recovered!");
+            // Debug.Log($"[Knockdown] P{playerID} recovered!");
         }
         else
         {
             OnArmDetached?.Invoke(playerID);
-            Debug.Log($"[Knockdown] P{playerID} arm detached — no more heavy attack!");
+            // Debug.Log($"[Knockdown] P{playerID} arm detached...... no more heavy attack!");
         }
 
         CurrentState = KnockdownState.None;
     }
 
-    // -------------------------------------------------------
-    // visual helpers
-    // -------------------------------------------------------
 
-    // snaps the visual slot back upright before get-up anim plays
     private void ResetVisual(int playerID)
     {
         var ctrl = GetController(playerID);
@@ -493,18 +476,18 @@ public class KnockdownManager : MonoBehaviour
             stringLineRenderer.enabled = false;
     }
 
-    // -------------------------------------------------------
+ 
 
     public void ResetKnockdown()
     {
-        CurrentState     = KnockdownState.None;
+        CurrentState = KnockdownState.None;
         downedPlayerID   = 0;
         attackerPlayerID = 0;
-        mashCount        = 0;
-        tugProgress      = 0f;
-        recoveryTimer    = 0f;
-        p1ArmGone        = false;
-        p2ArmGone        = false;
+        mashCount= 0;
+        tugProgress  = 0f;
+        recoveryTimer= 0f;
+        p1ArmGone = false;
+        p2ArmGone  = false;
 
         StopStringTrails();
         HideStringLine();
@@ -518,25 +501,23 @@ public class KnockdownManager : MonoBehaviour
         ResetVisual(1);
         ResetVisual(2);
 
-        Debug.Log("[Knockdown] reset");
+       
     }
 
     public bool isArmGone(int playerID) => playerID == 1 ? p1ArmGone : p2ArmGone;
 
-    // -------------------------------------------------------
-    // helpers
-    // -------------------------------------------------------
+
 
     private void StopStringTrails()
     {
-        p1StringTrail?.Stop();
-        p2StringTrail?.Stop();
+        if (p1StringTrail != null) p1StringTrail.Stop();
+        if (p2StringTrail != null) p2StringTrail.Stop();
         AudioManager.Instance?.StopStringPullLoop();
     }
 
     private MultiplayerPlayerController GetController(int id) => id == 1 ? p1Controller : p2Controller;
-    private PlayerHealth                GetHealth(int id)     => id == 1 ? p1Health      : p2Health;
-    private CombatSystem                GetCombat(int id)     => id == 1 ? p1Combat       : p2Combat;
-    private VoodooPhysicsLayer          GetPhysics(int id)    => id == 1 ? p1Physics      : p2Physics;
-    private CombatVFX                   GetVFX(int id)        => id == 1 ? p1VFX          : p2VFX;
+    private PlayerHealth GetHealth(int id) => id == 1 ? p1Health : p2Health;
+    private CombatSystem GetCombat(int id)  => id == 1 ? p1Combat: p2Combat;
+    private VoodooPhysicsLayer GetPhysics(int id) => id == 1 ? p1Physics: p2Physics;
+    private CombatVFX GetVFX(int id)  => id == 1 ? p1VFX : p2VFX;
 }
