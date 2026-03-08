@@ -201,66 +201,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 47da5a69ee5857b409581172511b0f05, type: 3}
   m_PrefabInstance: {fileID: 14568852}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &31812901
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 31812902}
-  - component: {fileID: 31812903}
-  m_Layer: 0
-  m_Name: Results
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &31812902
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 31812901}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 277316808}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &31812903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 31812901}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eae127af4d4677248bcb9d4ac21c9529, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RoundResultUI
-  p1BannerRect: {fileID: 262835170}
-  p2BannerRect: {fileID: 1631619900}
-  p1RoundText: {fileID: 830166952}
-  p2RoundText: {fileID: 344280399}
-  p1WinsLabel: {fileID: 1999797471}
-  p2WinsLabel: {fileID: 907940409}
-  offscreenX: 1200
-  slideInDuration: 0.22
-  holdDuration: 2.2
-  slideOutDuration: 0.18
-  matchOverRoot: {fileID: 1725830993}
-  matchBannerRect: {fileID: 1385489555}
-  matchWinnerText: {fileID: 2080057435}
-  matchScoreText: {fileID: 1029548470}
-  matchFadeInDuration: 0.4
-  roundManager: {fileID: 0}
 --- !u!1 &34083364
 GameObject:
   m_ObjectHideFlags: 0
@@ -1787,7 +1727,6 @@ Transform:
   - {fileID: 1006245925}
   - {fileID: 316320518}
   - {fileID: 880042827}
-  - {fileID: 31812902}
   - {fileID: 1324847945}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1865,8 +1804,8 @@ MonoBehaviour:
   killerShotManager: {fileID: 277316810}
   knockdownManager: {fileID: 316320516}
   roundsToWin: 2
-  roundEndDelay: 2
-  roundStartDelay: 1.5
+  roundEndDelay: 2.5
+  roundStartDelay: 1.8
   OnRoundStarted:
     m_PersistentCalls:
       m_Calls:
@@ -1885,7 +1824,7 @@ MonoBehaviour:
   OnRoundWon:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 31812903}
+      - m_Target: {fileID: 1792462974}
         m_TargetAssemblyTypeName: RoundResultUI, Assembly-CSharp
         m_MethodName: ShowRoundResult
         m_Mode: 0
@@ -1900,7 +1839,7 @@ MonoBehaviour:
   OnMatchWon:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 31812903}
+      - m_Target: {fileID: 1792462974}
         m_TargetAssemblyTypeName: RoundResultUI, Assembly-CSharp
         m_MethodName: ShowMatchOver
         m_Mode: 0
@@ -7943,7 +7882,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: PLAYER 2
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
   m_sharedMaterial: {fileID: 2418670280698724095, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
@@ -20232,7 +20171,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: PLAYER 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
   m_sharedMaterial: {fileID: 2418670280698724095, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
@@ -21568,7 +21507,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: WINS
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
   m_sharedMaterial: {fileID: 2418670280698724095, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
@@ -27214,10 +27153,10 @@ MonoBehaviour:
   colourReady: {r: 1, g: 1, b: 1, a: 1}
   colourNumber: {r: 1, g: 1, b: 1, a: 1}
   colourFight: {r: 0.6528301, g: 0.05296541, b: 0.06636943, a: 1}
-  punchScale: 1.4
+  punchScale: 2.5
   punchDuration: 0.12
   shrinkDuration: 0.18
-  fightPunchScale: 1.8
+  fightPunchScale: 2.8
 --- !u!4 &1006245925
 Transform:
   m_ObjectHideFlags: 0
@@ -29072,8 +29011,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
+  m_sharedMaterial: {fileID: 2418670280698724095, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -29103,7 +29042,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
@@ -42609,6 +42548,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1792462973}
+  - component: {fileID: 1792462974}
   m_Layer: 5
   m_Name: ResultsUI
   m_TagString: Untagged
@@ -42638,6 +42578,39 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1792462974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1792462972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eae127af4d4677248bcb9d4ac21c9529, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoundResultUI
+  p1BannerRect: {fileID: 262835170}
+  p2BannerRect: {fileID: 1631619900}
+  p1PlayerLabel: {fileID: 830166952}
+  p2PlayerLabel: {fileID: 344280399}
+  p1WinsLabel: {fileID: 1999797471}
+  p2WinsLabel: {fileID: 907940409}
+  offscreenX: 1200
+  slideInDuration: 0.22
+  holdDuration: 2.2
+  slideOutDuration: 0.18
+  matchOverRoot: {fileID: 1725830993}
+  matchBannerRect: {fileID: 1385489555}
+  matchWinnerText: {fileID: 2080057435}
+  matchScoreText: {fileID: 1029548470}
+  matchFadeInDuration: 0.4
+  playAgainButton: {fileID: 0}
+  mainMenuButton: {fileID: 0}
+  quitButton: {fileID: 0}
+  gameSceneName: Game
+  mainMenuSceneName: MainMenu
+  roundManager: {fileID: 277316811}
 --- !u!1 &1800493856
 GameObject:
   m_ObjectHideFlags: 0
@@ -59117,8 +59090,8 @@ MonoBehaviour:
 
 '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
+  m_sharedMaterial: {fileID: 2418670280698724095, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -59252,7 +59225,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: WINS
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
   m_sharedMaterial: {fileID: 2418670280698724095, guid: 40450678caafb4846a0adce434d70f1a, type: 2}
