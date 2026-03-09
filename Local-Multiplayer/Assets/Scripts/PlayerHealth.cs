@@ -2,10 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
-// tracks health and fires events
-// damage comes from two sources only: combat system hits, and string pulling during knockdown
-// killer shot reaction no longer deals direct damage — it just triggers the knockdown phase
-
 public class PlayerHealth : MonoBehaviour
 {
     [Header("Health Settings")]

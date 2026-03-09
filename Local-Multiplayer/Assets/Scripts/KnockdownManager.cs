@@ -55,6 +55,8 @@ public class KnockdownManager : MonoBehaviour
     private Transform p2ArmTransform;
     private ParticleSystem p1StringTrail;
     private ParticleSystem p2StringTrail;
+    private PlayerArmMarker p1ArmMarker;
+    private PlayerArmMarker p2ArmMarker;
 
    
     public UnityEvent<int>   OnKnockdownStarted;
@@ -133,8 +135,8 @@ public class KnockdownManager : MonoBehaviour
         var arms = FindObjectsByType<PlayerArmMarker>(FindObjectsSortMode.None);
         foreach (var arm in arms)
         {
-            if (arm.PlayerID == 1) { p1ArmTransform = arm.transform; p1StringTrail = arm.StringTrail; }
-            if (arm.PlayerID == 2) { p2ArmTransform = arm.transform; p2StringTrail = arm.StringTrail; }
+            if (arm.PlayerID == 1) { p1ArmTransform = arm.transform; p1StringTrail = arm.StringTrail; p1ArmMarker = arm; }
+            if (arm.PlayerID == 2) { p2ArmTransform = arm.transform; p2StringTrail = arm.StringTrail; p2ArmMarker = arm; }
         }
 
         
@@ -402,6 +404,10 @@ private void UpdateStringLine()
         if (armTransform != null)
             armTransform.localPosition = armDetachedOffset;
 
+        // Hide the arm renderers
+        var armMarker = downedPlayerID == 1 ? p1ArmMarker : p2ArmMarker;
+        armMarker?.SetArmVisible(false);
+
         if (downedPlayerID == 1) p1ArmGone = true;
         else                     
         p2ArmGone = true;
@@ -467,6 +473,10 @@ private void UpdateStringLine()
         var armTransform = playerID == 1 ? p1ArmTransform : p2ArmTransform;
         if (armTransform != null)
             armTransform.localPosition = Vector3.zero;
+
+        // Restore the arm renderers
+        var armMarker = playerID == 1 ? p1ArmMarker : p2ArmMarker;
+        armMarker?.SetArmVisible(true);
     }
 
     private void HideStringLine()

@@ -24,16 +24,16 @@ public class CombatSystem : MonoBehaviour
     [Header("Juice Settings")]
     [SerializeField] private float lightHitStopDuration = 0.04f;
     [SerializeField] private float heavyHitStopDuration = 0.09f;
-    [SerializeField] private float lightShakeMagnitude = 0.05f;
-    [SerializeField] private float heavyShakeMagnitude = 0.13f;
+    [SerializeField] private float lightShakeMagnitude = 0.9f;
+    [SerializeField] private float heavyShakeMagnitude = 0.18f;
     [SerializeField] private float shakeDuration = 0.15f;
 
     [Header("Player Separation")]
-    [SerializeField] private float minSeparationDistance = 1.2f;    // closer than this = push apart
-    [SerializeField] private float separationForce = 6f;            // how hard the push is
+    [SerializeField] private float minSeparationDistance = 1.2f;  
+    [SerializeField] private float separationForce = 6f;     
 
 
-    // --- resolved at start / update ---
+   
     private PlayerHealth myHealth;
     private PlayerHealth opponentHealth;
     private CombatSystem opponentCombat;
@@ -55,7 +55,7 @@ public class CombatSystem : MonoBehaviour
     private MultiplayerPlayerController MultiplayerScript;
     [SerializeField] AnimationManager animationScript;
 
-    // -------------------------------------------------------
+    
 
     private void Awake()
     {
@@ -91,12 +91,10 @@ public class CombatSystem : MonoBehaviour
         if (!combatEnabled) return;
 
         HandleBlock();
-        HandleSeparation();  // FIX: prevent players phasing into each other
+        HandleSeparation();  
     }
 
-    // -------------------------------------------------------
-    // opponent link
-    // -------------------------------------------------------
+
 
     private void TryFindOpponent()
     {
@@ -104,12 +102,12 @@ public class CombatSystem : MonoBehaviour
         foreach (var other in allCombat)
         {
             if (other == this) continue;
-            opponentHealth     = other.GetComponent<PlayerHealth>();
-            opponentCombat     = other;
+            opponentHealth = other.GetComponent<PlayerHealth>();
+            opponentCombat  = other;
             opponentController = other.GetComponent<MultiplayerPlayerController>();
-            opponentVFX        = other.GetComponent<CombatVFX>();
-            opponentLinked     = true;
-            Debug.Log("[P" + controller.PlayerID + " CombatSystem] opponent linked");
+            opponentVFX   = other.GetComponent<CombatVFX>();
+            opponentLinked = true;
+            // Debug.Log("[P" + controller.PlayerID + " CombatSystem] opponent linked");
             break;
         }
     }
@@ -123,12 +121,7 @@ public class CombatSystem : MonoBehaviour
         IsBlocking = controller.BlockHeld && !IsAttacking;
     }
 
-    // -------------------------------------------------------
-    // FIX: player separation
-    // Only this player's CombatSystem applies force to itself — the opponent's
-    // script does the same for the other side, so both get pushed equally.
-    // Using ApplyKnockback keeps it consistent with the existing physics.
-    // -------------------------------------------------------
+
 
     private void HandleSeparation()
     {
@@ -255,18 +248,18 @@ public class CombatSystem : MonoBehaviour
     {
         heavyEnabled = enabled;
         if (!enabled)
-            Debug.Log("[P" + controller.PlayerID + " CombatSystem] heavy attack disabled - arm is gone");
+            Debug.Log("[P" + controller.PlayerID + " CombatSystem] heavy attack disabled... arm is gone");
     }
 
     // -------------------------------------------------------
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.purple;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+    // private void OnDrawGizmosSelected()
+    // {
+    //     Gizmos.color = Color.purple;
+    //     Gizmos.DrawWireSphere(transform.position, attackRange);
 
-        // visualise separation bubble too
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, minSeparationDistance);
-    }
+    //     
+    //     Gizmos.color = Color.yellow;
+    //     Gizmos.DrawWireSphere(transform.position, minSeparationDistance);
+    // }
 }
