@@ -479,16 +479,16 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Two voodoo dolls enter. Only one leaves intact.\nCombat\n\nLight Attack
+  m_Text: "Two voodoo dolls enter. Only one leaves intact.\n\nCombat:\nLight Attack
     \u2014 quick jab\nHeavy Attack \u2014 slow but hits hard\nBlock \u2014 hold to
     reduce incoming damage\nFirst to drain the opponent's health triggers a Killer
-    Shot\n\n\nKiller Shot\nWhen a player's health drops low, a reaction prompt appears.
+    Shot\n\n\nKiller Shot:\nWhen a player's health drops low, a reaction prompt appears.
     Press the reaction button as fast as you can \u2014 whoever reacts first wins
-    the exchange and knocks the opponent down.\n\n\nKnockdown\nThe downed player
+    the exchange and knocks the opponent down.\n\n\nKnockdown:\nThe downed player
     must mash the get-up button to recover before time runs out. Meanwhile the attacker
     can hold Block to pull the downed player's arm \u2014 pull it far enough and
-    they lose their heavy attack for the rest of the round.\n\n\nWinning\nFirst to
-    win 2 rounds wins the match."
+    they lose their heavy attack for the rest of the round.\n\n\nWinning:\nFirst
+    to win 2 rounds wins the match."
 --- !u!222 &163861723
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1281,9 +1281,9 @@ MonoBehaviour:
   sfxVolume: 1
   musicTrack: {fileID: 8300000, guid: 82a8ac74164e61646945e1b7132d7cfc, type: 3}
   lightHit: {fileID: 8300000, guid: ac6717755fe6770479b55b5c095a7c4f, type: 3}
-  heavyHit: {fileID: 8300000, guid: ac6717755fe6770479b55b5c095a7c4f, type: 3}
-  blockImpact: {fileID: 0}
-  knockdownFall: {fileID: 0}
+  heavyHit: {fileID: 8300000, guid: c3aa3ddad0edabc4cb5820f629ce5cdb, type: 3}
+  blockImpact: {fileID: 8300000, guid: ce3dc0147b78e6941a75e8ea7e8a1b84, type: 3}
+  knockdownFall: {fileID: 8300000, guid: 5f41599651a18624598cb73b67199728, type: 3}
   mashGetUp: {fileID: 0}
   standUpSuccess: {fileID: 0}
   armDetach: {fileID: 0}

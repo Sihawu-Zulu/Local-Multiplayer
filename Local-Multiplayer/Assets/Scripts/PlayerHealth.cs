@@ -9,7 +9,7 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private float killerShotThreshold = 30f;  
 
     [Header("Reaction Settings")]
-    [SerializeField] private float reactDuration = 0.5f;        //  TakeDamage anim length
+    [SerializeField] private float reactDuration = 0.5f;      
 
     [Header("Animation stuff")]
     public bool IsReacting { get; private set; }
@@ -17,18 +17,18 @@ public class PlayerHealth : MonoBehaviour
     [Header("Debug / Live View")]
     [SerializeField, Range(0f, 100f)] private float currentHealth;
 
-    // --- public state ---
+
     public float CurrentHealth => currentHealth;
     public float MaxHealth => maxHealth;
     public bool IsDefeated { get; private set; }
     public bool KillerShotReady { get; private set; }
 
-    // --- events ---
+  
     public UnityEvent<float, float> OnHealthChanged;      
     public UnityEvent OnKillerShotTriggered;
     public UnityEvent OnPlayerDefeated;
 
-    // -------------------------------------------------------
+  
 
     private MultiplayerPlayerController MultiplayerScript;
     private Coroutine reactCoroutine;

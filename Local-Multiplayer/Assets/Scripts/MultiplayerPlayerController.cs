@@ -50,7 +50,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     public event Action OnLightAttackEvent;
     public event Action OnHeavyAttackEvent;
     public event Action OnReactionEvent;
-    public event Action OnGetUpEvent;       // north button mash — recover from knockdown
+    public event Action OnGetUpEvent;   
 
     private bool movementEnabled = false;
     public bool BlockHeld { get; private set; }
@@ -59,7 +59,7 @@ public class MultiplayerPlayerController : MonoBehaviour
     // p1 faces right (+1), p2 faces left (-1) this has been a bitch wtf 
     private float facingDirection = 1f;
 
-    // -------------------------------------------------------
+   
 
     private void Awake()
     {
@@ -119,7 +119,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         if (combat != null && combat.IsAttacking)
         {
-            return; // ensures attack animations wont override
+            return; // sooo attack animations wont override
         }
 
         if (playerHealth != null && playerHealth.IsReacting)
@@ -149,7 +149,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
     // -------------------------------------------------------
     // spawn stuffff
-    // -------------------------------------------------------
+   
 
     public void MoveToSpawnPoint()
     {
@@ -177,7 +177,7 @@ public class MultiplayerPlayerController : MonoBehaviour
 
         GameObject Player = Instantiate(prefab, characterVisualSlot.position, characterVisualSlot.rotation, characterVisualSlot);
         animationScript = Player.GetComponent<AnimationManager>();
-        // p2 model is  facing the same direction as p1.... flip x scale so they face each other
+      
         if (PlayerID == 2)
         {
             Vector3 s = characterVisualSlot.localScale;

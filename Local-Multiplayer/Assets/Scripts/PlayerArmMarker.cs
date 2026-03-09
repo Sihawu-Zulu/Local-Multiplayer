@@ -5,7 +5,7 @@ public class PlayerArmMarker : MonoBehaviour
     public int             PlayerID;
     public ParticleSystem  StringTrail;
 
-    // Cached on Awake — includes the arm and every child (fingers, sleeve, etc.)
+
     private Renderer[] renderers;
 
     private void Awake()

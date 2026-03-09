@@ -19,12 +19,12 @@ public class JoinUIManager : MonoBehaviour
     [SerializeField] private float hideDelay = 1.5f;
 
     [Header("References")]
-    [SerializeField] private CountdownManager countdownManager;   // << assign in inspector
+    [SerializeField] private CountdownManager countdownManager;  
 
     private bool p1Joined = false;
     private bool p2Joined = false;
 
-    // -------------------------------------------------------
+    //======================
 
     private void Start()
     {
@@ -55,7 +55,7 @@ public class JoinUIManager : MonoBehaviour
             StartCoroutine(HideAllAfterDelay());
     }
 
-    // -------------------------------------------------------
+    //=
 
     private void ShowJoined(TextMeshProUGUI promptText, TextMeshProUGUI joinedText)
     {
@@ -65,7 +65,7 @@ public class JoinUIManager : MonoBehaviour
 
     private IEnumerator HideAllAfterDelay()
     {
-        Debug.Log($"[JoinUIManager] calling StartCountdown, manager null: {countdownManager == null}");
+        // Debug.Log($"[JoinUIManager] calling StartCountdown, manager null: {countdownManager == null}");
 
         yield return new WaitForSeconds(hideDelay);
 

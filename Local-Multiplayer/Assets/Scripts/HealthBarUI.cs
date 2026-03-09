@@ -6,9 +6,6 @@ using TMPro;
 
 public class HealthBarUI : MonoBehaviour
 {
-    // -------------------------------------------------------
-    // serializable structs
-    // -------------------------------------------------------
 
     [System.Serializable]
     public class PlayerHUD
@@ -42,7 +39,7 @@ public class HealthBarUI : MonoBehaviour
     [SerializeField] private Color flashColor    = Color.white;
 
     // -------------------------------------------------------
-    // called by HealthBarInitialiser  once both players have spawned
+    // called by   once both players have spawned
     // -------------------------------------------------------
 
     public void InitialiseHUD(PlayerHealth p1Health, PlayerHealth p2Health,
@@ -69,9 +66,9 @@ public class HealthBarUI : MonoBehaviour
         SetSlider(hud, health.CurrentHealth, health.MaxHealth);
     }
 
-    // -------------------------------------------------------
+    
     // health bar update
-    // -------------------------------------------------------
+   
 
     private void OnHealthChanged(PlayerHUD hud, float current, float max)
     {

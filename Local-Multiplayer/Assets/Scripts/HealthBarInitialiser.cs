@@ -1,9 +1,6 @@
 using UnityEngine;
 
 
-// polls until both players are found, then calls HealthBarUI.InitialiseHUD
-
-
 public class HealthBarInitialiser : MonoBehaviour
 {
     [Header("References")]
@@ -17,13 +14,13 @@ public class HealthBarInitialiser : MonoBehaviour
 
     private bool initialised = false;
 
-    // -------------------------------------------------------
+
 
     private void Update()
     {
         if (initialised) return;
 
-        // keep trying each frame until both players are in the scene
+        
         var controllers = FindObjectsByType<MultiplayerPlayerController>(FindObjectsSortMode.None);
 
         PlayerHealth p1Health = null;
@@ -37,7 +34,7 @@ public class HealthBarInitialiser : MonoBehaviour
 
         if (p1Health == null || p2Health == null) return;   
 
-        // both found — initialise and stop checking
+  
         healthBarUI.InitialiseHUD(p1Health, p2Health, p1Avatar, p2Avatar, p1Name, p2Name);
         initialised = true;
 

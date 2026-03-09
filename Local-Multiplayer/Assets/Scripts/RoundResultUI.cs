@@ -6,10 +6,7 @@ using TMPro;
 
 public class RoundResultUI : MonoBehaviour
 {
-    // -------------------------------------------------------
-    // Round banners
-    // -------------------------------------------------------
-
+   
     [Header("Round Banners")]
     [SerializeField] private RectTransform   p1BannerRect;
     [SerializeField] private RectTransform   p2BannerRect;

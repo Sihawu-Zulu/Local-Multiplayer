@@ -33,7 +33,7 @@ public class KillerShotPromptUI : MonoBehaviour
     [SerializeField] private string earlyPrefix   = "TOO EARLY!";
     [SerializeField] private string latePrefix    = "TOO LATE!";
     [SerializeField] private string perfectPrefix = "PERFECT!";
-    [SerializeField] private bool   showPlayerName = true;        // prefix with "P1 " / "P2 "
+    [SerializeField] private bool   showPlayerName = true;        
 
     [Header("Feedback Timing")]
     [SerializeField] private float feedbackDuration = 1.2f;
@@ -41,19 +41,19 @@ public class KillerShotPromptUI : MonoBehaviour
 
     [Header("Feedback Colours")]
     [SerializeField] private Color colourEarly   = Color.red;
-    [SerializeField] private Color colourLate    = new Color(1f, 0.5f, 0f);   // orange
-    [SerializeField] private Color colourPerfect = new Color(0.2f, 1f, 0.4f); // green
+    [SerializeField] private Color colourLate    = new Color(1f, 0.5f, 0f);   
+    [SerializeField] private Color colourPerfect = new Color(0.2f, 1f, 0.4f); 
 
     [Header("References")]
     [SerializeField] private KillerShotManager killerShotManager;
 
-    // --- state ---
+  
     private bool      isPulsing = false;
     private Coroutine pulseCoroutine;
     private Coroutine p1FeedbackCoroutine;
     private Coroutine p2FeedbackCoroutine;
 
-    // -------------------------------------------------------
+  
 
     private void Start()
     {
@@ -74,15 +74,13 @@ public class KillerShotPromptUI : MonoBehaviour
         killerShotManager.OnTooLate.AddListener(ShowTooLate);
     }
 
-    // -------------------------------------------------------
-    // show / hide prompt
-    // -------------------------------------------------------
+  
 
     private void ShowPrompt(int triggeringPlayerID)
     {
         if (promptRoot != null) promptRoot.SetActive(true);
 
-        // set prompt label — tells the opponent who they need to react against
+
         if (promptText != null)
         {
             promptText.text = triggeringPlayerID == 1 ? p1PromptLabel
@@ -112,10 +110,7 @@ public class KillerShotPromptUI : MonoBehaviour
         }
     }
 
-    // -------------------------------------------------------
-    // pulse routine — faster + redder as time runs out
-    // -------------------------------------------------------
-
+ 
     private IEnumerator PulseRoutine()
     {
         float t = 0f;
@@ -144,9 +139,7 @@ public class KillerShotPromptUI : MonoBehaviour
             promptRoot.transform.localScale = Vector3.one;
     }
 
-    // -------------------------------------------------------
-    // feedback
-    // -------------------------------------------------------
+
 
     private void ShowEarlyPress(int playerID) => ShowFeedback(playerID, earlyPrefix,   colourEarly);
     private void ShowPerfect(int playerID)    => ShowFeedback(playerID, perfectPrefix,  colourPerfect);
@@ -157,7 +150,7 @@ public class KillerShotPromptUI : MonoBehaviour
         TextMeshProUGUI target = playerID == 1 ? p1FeedbackText : p2FeedbackText;
         if (target == null) return;
 
-        // stop any existing fade on this player's side
+  
         if (playerID == 1 && p1FeedbackCoroutine != null) StopCoroutine(p1FeedbackCoroutine);
         if (playerID == 2 && p2FeedbackCoroutine != null) StopCoroutine(p2FeedbackCoroutine);
 
